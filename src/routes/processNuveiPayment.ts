@@ -1,5 +1,4 @@
 import { Request, Response } from 'express';
-import fetch from 'node-fetch';
 import { supabase } from '../index';
 import { createNuveiAuthToken, generateIdempotencyId, NuveiPaymentResponse } from '../utils/nuvei';
 

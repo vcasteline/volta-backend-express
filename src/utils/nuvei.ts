@@ -61,36 +61,23 @@ export function createNuveiAuthToken(): string {
   const hashString = secretKey + timestamp;
   const sha256Hash = createSHA256Hash(hashString);
   
-  // Determinar si estamos en producción
-  const isProduction = baseUrl.includes('ccapi.paymentez.com');
+  // Formato: APPLICATION-CODE;TIMESTAMP;SHA256_HASH
+  const authString = `${applicationCode};${timestamp};${sha256Hash}`;
   
-  let authToken: string;
+  // Codificar en base64
+  const authToken = Buffer.from(authString).toString('base64');
   
-  if (isProduction) {
-    // En producción, usar solo el hash SHA256
-    authToken = sha256Hash;
-    
-    console.log('🔑 Nuvei Auth Token creado (PRODUCCIÓN):', {
-      timestamp,
-      hashString: hashString.substring(0, 20) + '...',
-      sha256Hash: sha256Hash.substring(0, 20) + '...',
-      token: authToken.substring(0, 30) + '...',
-      environment: 'PRODUCTION'
-    });
-  } else {
-    // En staging, usar el formato base64
-    const authString = `${applicationCode};${timestamp};${sha256Hash}`;
-    authToken = Buffer.from(authString).toString('base64');
-    
-    console.log('🔑 Nuvei Auth Token creado (STAGING):', {
-      timestamp,
-      hashString: hashString.substring(0, 20) + '...',
-      sha256Hash: sha256Hash.substring(0, 20) + '...',
-      authString: authString.substring(0, 50) + '...',
-      token: authToken.substring(0, 30) + '...',
-      environment: 'STAGING'
-    });
-  }
+  const environment = baseUrl.includes('ccapi.paymentez.com') ? 'PRODUCTION' : 'STAGING';
+  
+  console.log(`🔑 Nuvei Auth Token creado (${environment}):`, {
+    timestamp,
+    hashString: hashString.substring(0, 20) + '...',
+    sha256Hash: sha256Hash.substring(0, 20) + '...',
+    authString: authString.substring(0, 50) + '...',
+    token: authToken.substring(0, 30) + '...',
+    environment,
+    applicationCode
+  });
   
   return authToken;
 }

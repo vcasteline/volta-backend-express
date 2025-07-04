@@ -76,7 +76,7 @@ export const sendPushNotification = [
       // Obtener tokens de push de los usuarios
       const { data: pushTokens, error: tokensError } = await supabase
         .from('user_push_tokens')
-        .select('push_token, user_id')
+        .select('expo_push_token, user_id')
         .in('user_id', userIds)
         .eq('is_active', true);
 
@@ -97,7 +97,7 @@ export const sendPushNotification = [
 
       // Preparar mensajes para Expo
       const messages: ExpoPushMessage[] = pushTokens.map(tokenData => ({
-        to: tokenData.push_token,
+        to: tokenData.expo_push_token,
         title,
         body: notificationBody,
         data: data || {},

@@ -108,7 +108,12 @@ export const waitlistNotification = [
         priority: 'high'
       };
 
-      const serverUrl = process.env.SERVER_URL || 'http://localhost:3000';
+      // Construir URL completa con protocolo correcto
+      let serverUrl = process.env.SERVER_URL || 'http://localhost:3000';
+      if (!serverUrl.startsWith('http://') && !serverUrl.startsWith('https://')) {
+        serverUrl = `https://${serverUrl}`;
+      }
+      
       const notificationResponse = await fetch(`${serverUrl}/api/send-push-notification`, {
         method: 'POST',
         headers: {

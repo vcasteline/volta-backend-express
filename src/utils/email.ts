@@ -218,7 +218,7 @@ const createReservationEmailTemplate = (data: ReservationEmailData): string => {
         
         <div class="class-details">
           <h3>Detalles de tu clase:</h3>
-          <p><strong>Clase:</strong> ${data.className}</p>
+          <p><strong>Clase:</strong> ${data.className || `Giro con ${data.instructorName}`}</p>
           <p><strong>Instructor:</strong> <span class="highlight">${data.instructorName}</span></p>
           <p><strong>Fecha:</strong> ${data.classDate}</p>
           <p><strong>Hora:</strong> ${data.classTime}</p>
@@ -372,7 +372,7 @@ export async function sendReservationConfirmationEmail(data: ReservationEmailDat
     const { data: result, error } = await resend.emails.send({
       from: FROM_EMAIL,
       to: [data.user.email],
-      subject: `Reserva confirmada: ${data.className} - Giro`,
+      subject: `Reserva confirmada: ${data.className || `Giro con ${data.instructorName}`} - Giro`,
       html: createReservationEmailTemplate(data),
     });
 

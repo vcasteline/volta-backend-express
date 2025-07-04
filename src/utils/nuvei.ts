@@ -48,6 +48,7 @@ export function createSHA256Hash(message: string): string {
 export function createNuveiAuthToken(): string {
   const applicationCode = process.env.NUVEI_APPLICATION_CODE;
   const secretKey = process.env.NUVEI_SECRET_KEY;
+  const baseUrl = process.env.NUVEI_BASE_URL || 'https://ccapi-stg.paymentez.com';
   
   if (!applicationCode || !secretKey) {
     throw new Error('Missing Nuvei credentials');
@@ -60,19 +61,36 @@ export function createNuveiAuthToken(): string {
   const hashString = secretKey + timestamp;
   const sha256Hash = createSHA256Hash(hashString);
   
-  // Formato: APPLICATION-CODE;TIMESTAMP;SHA256_HASH
-  const authString = `${applicationCode};${timestamp};${sha256Hash}`;
+  // Determinar si estamos en producción
+  const isProduction = baseUrl.includes('ccapi.paymentez.com');
   
-  // Codificar en base64
-  const authToken = Buffer.from(authString).toString('base64');
+  let authToken: string;
   
-  console.log('🔑 Nuvei Auth Token creado:', {
-    timestamp,
-    hashString: hashString.substring(0, 20) + '...',
-    sha256Hash: sha256Hash.substring(0, 20) + '...',
-    authString: authString.substring(0, 50) + '...',
-    token: authToken.substring(0, 30) + '...'
-  });
+  if (isProduction) {
+    // En producción, usar solo el hash SHA256
+    authToken = sha256Hash;
+    
+    console.log('🔑 Nuvei Auth Token creado (PRODUCCIÓN):', {
+      timestamp,
+      hashString: hashString.substring(0, 20) + '...',
+      sha256Hash: sha256Hash.substring(0, 20) + '...',
+      token: authToken.substring(0, 30) + '...',
+      environment: 'PRODUCTION'
+    });
+  } else {
+    // En staging, usar el formato base64
+    const authString = `${applicationCode};${timestamp};${sha256Hash}`;
+    authToken = Buffer.from(authString).toString('base64');
+    
+    console.log('🔑 Nuvei Auth Token creado (STAGING):', {
+      timestamp,
+      hashString: hashString.substring(0, 20) + '...',
+      sha256Hash: sha256Hash.substring(0, 20) + '...',
+      authString: authString.substring(0, 50) + '...',
+      token: authToken.substring(0, 30) + '...',
+      environment: 'STAGING'
+    });
+  }
   
   return authToken;
 }

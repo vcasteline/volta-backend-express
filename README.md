@@ -39,6 +39,10 @@ NUVEI_APPLICATION_CODE=your_nuvei_application_code
 NUVEI_SECRET_KEY=your_nuvei_secret_key
 NUVEI_BASE_URL=https://ccapi-stg.paymentez.com
 
+# Email configuration (Resend)
+RESEND_API_KEY=your_resend_api_key
+FRONTEND_URL=https://your-frontend-url.com
+
 # Expo Push Notifications
 EXPO_ACCESS_TOKEN=your_expo_access_token
 

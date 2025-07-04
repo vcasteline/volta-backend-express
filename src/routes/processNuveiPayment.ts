@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { supabase } from '../index';
 import { createNuveiAuthToken, generateIdempotencyId, NuveiPaymentResponse } from '../utils/nuvei';
+import { sendPurchaseConfirmationEmail } from '../utils/email';
 
 interface PaymentRequest {
   packageId: string;
@@ -351,9 +352,41 @@ export const processNuveiPayment = async (req: Request, res: Response) => {
             paymentResult
           );
 
+          // Enviar email de confirmación de compra
+          const emailResult = await sendPurchaseConfirmationEmail({
+            user: {
+              email: user.email || '',
+              name: user.user_metadata?.name || user.email || 'Cliente'
+            },
+            packageName: packageData.name,
+            credits: credits || packageData.class_credits,
+            amount: amount,
+            purchaseDate: new Date().toLocaleDateString('es-ES', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit'
+            }),
+            expirationDate: packageData.expiration_days ? 
+              new Date(Date.now() + (packageData.expiration_days * 24 * 60 * 60 * 1000)).toLocaleDateString('es-ES', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+              }) : undefined,
+            authorizationCode: paymentResult.transaction.authorization_code || ''
+          });
+
+          if (!emailResult.success) {
+            console.error('⚠️ Error enviando email de compra (no afecta la transacción):', emailResult.error);
+          } else {
+            console.log('✅ Email de compra enviado exitosamente:', emailResult.messageId);
+          }
+
           return res.status(200).json({
             success: true,
-            transaction: paymentResult
+            transaction: paymentResult,
+            emailSent: emailResult.success
           });
 
         } catch (atomicError: any) {

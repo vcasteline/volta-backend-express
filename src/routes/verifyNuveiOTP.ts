@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { supabase } from '../index';
 import { createNuveiAuthToken, getStatusMeaning, NuveiVerifyResponse } from '../utils/nuvei';
+import { sendPurchaseConfirmationEmail } from '../utils/email';
 
 interface VerifyRequest {
   transactionId: string;
@@ -163,11 +164,43 @@ export const verifyNuveiOTP = async (req: Request, res: Response) => {
           verifyResult
         );
 
+        // Enviar email de confirmación de compra
+        const emailResult = await sendPurchaseConfirmationEmail({
+          user: {
+            email: user.email || '',
+            name: user.user_metadata?.name || user.email || 'Cliente'
+          },
+          packageName: packageData.name,
+          credits: credits || packageData.class_credits,
+          amount: packageData.price || 0,
+          purchaseDate: new Date().toLocaleDateString('es-ES', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+          }),
+          expirationDate: packageData.expiration_days ? 
+            new Date(Date.now() + (packageData.expiration_days * 24 * 60 * 60 * 1000)).toLocaleDateString('es-ES', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric'
+            }) : undefined,
+          authorizationCode: transactionId
+        });
+
+        if (!emailResult.success) {
+          console.error('⚠️ Error enviando email de compra OTP (no afecta la transacción):', emailResult.error);
+        } else {
+          console.log('✅ Email de compra OTP enviado exitosamente:', emailResult.messageId);
+        }
+
         return res.status(200).json({
           success: true,
           message: 'OTP verified successfully and purchase completed',
           status: statusMeaning,
-          transaction_id: transactionId
+          transaction_id: transactionId,
+          emailSent: emailResult.success
         });
 
       } catch (atomicError: any) {

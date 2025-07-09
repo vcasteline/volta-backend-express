@@ -226,10 +226,10 @@ export const processNuveiPayment = async (req: Request, res: Response) => {
       });
     }
 
-    // Calcular VAT (IVA del 12% en Ecuador)
+    // Calcular VAT (IVA del 15% en Ecuador)
     // Asumiendo que 'amount' es el monto total incluyendo IVA
-    const TAX_PERCENTAGE = 12;
-    const taxableAmount = Math.round((amount / 1.12) * 100) / 100; // Monto sin IVA
+    const TAX_PERCENTAGE = 15;
+    const taxableAmount = Math.round((amount / 1.15) * 100) / 100; // Monto sin IVA
     const calculatedVat = Math.round((amount - taxableAmount) * 100) / 100; // IVA calculado
 
     // Obtener la cédula del usuario

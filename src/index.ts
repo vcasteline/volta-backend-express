@@ -20,6 +20,7 @@ import { forgotPassword } from './routes/forgotPassword';
 import { resetPassword } from './routes/resetPassword';
 import { sendReservationEmail } from './routes/sendReservationEmail';
 import { sendPurchaseEmail } from './routes/sendPurchaseEmail';
+import deleteAccountRouter from './routes/deleteAccount';
 import { creditsExpirationCron } from './cron/creditsExpiration';
 import { classRemindersCron } from './cron/classReminders';
 import { completePastClassesCron } from './cron/completePastClasses';
@@ -69,6 +70,7 @@ app.get('/health', (req, res) => {
 app.get('/api/get-user-cards', authMiddleware, getUserCards);
 app.post('/api/process-nuvei-payment', authMiddleware, processNuveiPayment);
 app.post('/api/verify-nuvei-otp', authMiddleware, verifyNuveiOTP);
+app.use('/api', authMiddleware, deleteAccountRouter);
 
 // Rutas de sistema (sin autenticación de usuario, pero con validación de service key)
 app.post('/api/send-push-notification', sendPushNotification);

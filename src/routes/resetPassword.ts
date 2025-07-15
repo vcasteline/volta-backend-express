@@ -1,20 +1,19 @@
 import { Request, Response } from 'express';
 import { supabase } from '../index';
-import { createHash } from 'crypto';
 
 interface ResetPasswordRequest {
-  token: string;
+  userId: string;
   newPassword: string;
 }
 
 export const resetPassword = async (req: Request, res: Response) => {
   try {
-    const { token, newPassword }: ResetPasswordRequest = req.body;
+    const { userId, newPassword }: ResetPasswordRequest = req.body;
 
-    if (!token || !newPassword) {
+    if (!userId || !newPassword) {
       return res.status(400).json({
         success: false,
-        error: 'Token y nueva contraseña son requeridos'
+        error: 'ID de usuario y nueva contraseña son requeridos'
       });
     }
 
@@ -26,45 +25,23 @@ export const resetPassword = async (req: Request, res: Response) => {
       });
     }
 
-    // Crear hash del token para buscar en la base de datos
-    const tokenHash = createHash('sha256').update(token).digest('hex');
-
-    // Buscar token válido
-    const { data: resetToken, error: tokenError } = await supabase
-      .from('password_reset_tokens')
-      .select('user_id, expires_at, used')
-      .eq('token_hash', tokenHash)
+    // Verificar que el usuario existe
+    const { data: user, error: userError } = await supabase
+      .from('users')
+      .select('id, email')
+      .eq('id', userId)
       .single();
 
-    if (tokenError || !resetToken) {
+    if (userError || !user) {
       return res.status(400).json({
         success: false,
-        error: 'Token inválido o expirado'
-      });
-    }
-
-    // Verificar si el token ya fue usado
-    if (resetToken.used) {
-      return res.status(400).json({
-        success: false,
-        error: 'Este token ya ha sido usado'
-      });
-    }
-
-    // Verificar si el token ha expirado
-    const now = new Date();
-    const expiresAt = new Date(resetToken.expires_at);
-    
-    if (now > expiresAt) {
-      return res.status(400).json({
-        success: false,
-        error: 'El token ha expirado'
+        error: 'Usuario no encontrado'
       });
     }
 
     // Actualizar contraseña usando Supabase Auth
     const { error: updateError } = await supabase.auth.admin.updateUserById(
-      resetToken.user_id,
+      userId,
       {
         password: newPassword
       }
@@ -78,37 +55,23 @@ export const resetPassword = async (req: Request, res: Response) => {
       });
     }
 
-    // Marcar token como usado
-    const { error: markUsedError } = await supabase
-      .from('password_reset_tokens')
-      .update({
-        used: true,
-        used_at: new Date().toISOString()
-      })
-      .eq('token_hash', tokenHash);
-
-    if (markUsedError) {
-      console.error('Error marcando token como usado:', markUsedError);
-      // No devolver error ya que la contraseña se actualizó exitosamente
-    }
-
-    // Invalidar todos los otros tokens del usuario
+    // Invalidar todos los tokens de reset existentes del usuario
     const { error: invalidateError } = await supabase
       .from('password_reset_tokens')
       .update({
-        used: true,
         used_at: new Date().toISOString()
       })
-      .eq('user_id', resetToken.user_id)
-      .eq('used', false);
+      .eq('user_id', userId)
+      .is('used_at', null);
 
     if (invalidateError) {
-      console.error('Error invalidando otros tokens:', invalidateError);
+      console.error('Error invalidando tokens de reset:', invalidateError);
       // No devolver error ya que la contraseña se actualizó exitosamente
     }
 
     console.log('✅ Contraseña actualizada exitosamente:', {
-      userId: resetToken.user_id,
+      userId: userId,
+      email: user.email,
       timestamp: new Date().toISOString()
     });
 

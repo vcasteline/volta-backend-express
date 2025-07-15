@@ -18,6 +18,7 @@ import { deleteCardHandler } from './routes/deleteCard';
 import { sendPushNotification } from './routes/sendPushNotification';
 import { waitlistNotification } from './routes/waitlistNotification';
 import { forgotPassword } from './routes/forgotPassword';
+import { verifyResetCode } from './routes/verifyResetCode';
 import { resetPassword } from './routes/resetPassword';
 import { sendReservationEmail } from './routes/sendReservationEmail';
 import { sendPurchaseEmail } from './routes/sendPurchaseEmail';
@@ -72,7 +73,7 @@ app.get('/api/get-user-cards', authMiddleware, getUserCards);
 app.post('/api/process-nuvei-payment', authMiddleware, processNuveiPayment);
 app.post('/api/verify-nuvei-otp', authMiddleware, verifyNuveiOTP);
 app.post('/api/delete-card', authMiddleware, deleteCardHandler);
-app.use('/api', authMiddleware, deleteAccountRouter);
+app.use('/api/delete-account', authMiddleware, deleteAccountRouter);
 
 // Rutas de sistema (sin autenticación de usuario, pero con validación de service key)
 app.post('/api/send-push-notification', sendPushNotification);
@@ -80,6 +81,7 @@ app.post('/api/waitlist-notification', waitlistNotification);
 
 // Email routes
 app.post('/api/forgot-password', forgotPassword);
+app.post('/api/verify-reset-code', verifyResetCode);
 app.post('/api/reset-password', resetPassword);
 app.post('/api/send-reservation-email', sendReservationEmail);
 app.post('/api/send-purchase-email', authMiddleware, sendPurchaseEmail);

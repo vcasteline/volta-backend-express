@@ -93,6 +93,10 @@ export function generateIdempotencyId(userId: string, packageId: string, cardTok
 }
 
 // Función para interpretar códigos de estado de Nuvei
+export interface NuveiDeleteCardResponse {
+  message: string;
+}
+
 export function getStatusMeaning(status: number, statusDetail: number): string {
   const statusMap: { [key: number]: string } = {
     0: "Pending",
@@ -149,4 +153,53 @@ export function getStatusMeaning(status: number, statusDetail: number): string {
   const statusDetailText = statusDetailMap[statusDetail] || `Unknown detail (${statusDetail})`;
   
   return `${statusText} - ${statusDetailText}`;
+}
+
+// Función para eliminar una tarjeta
+export async function deleteCard(cardToken: string, userId: string): Promise<NuveiDeleteCardResponse> {
+  try {
+    const baseUrl = process.env.NUVEI_BASE_URL || 'https://ccapi-stg.paymentez.com';
+    const authToken = createNuveiAuthToken();
+    
+    console.log('🗑️ Eliminando tarjeta:', {
+      cardToken: cardToken.substring(0, 10) + '...',
+      userId,
+      baseUrl
+    });
+
+    const response = await fetch(`${baseUrl}/v2/card/delete/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Auth-Token': authToken
+      },
+      body: JSON.stringify({
+        card: {
+          token: cardToken
+        },
+        user: {
+          id: userId
+        }
+      })
+    });
+
+    const data = await response.json() as NuveiDeleteCardResponse | { error: { description?: string; type?: string } };
+    
+    if (!response.ok) {
+      const errorData = data as { error: { description?: string; type?: string } };
+      console.error('❌ Error al eliminar tarjeta:', {
+        status: response.status,
+        statusText: response.statusText,
+        error: errorData
+      });
+      throw new Error(errorData.error?.description || errorData.error?.type || 'Error al eliminar tarjeta');
+    }
+
+    console.log('✅ Tarjeta eliminada exitosamente:', data);
+    return data as NuveiDeleteCardResponse;
+    
+  } catch (error) {
+    console.error('❌ Error en deleteCard:', error);
+    throw error;
+  }
 } 

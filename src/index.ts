@@ -14,6 +14,7 @@ import { authMiddleware } from './middleware/auth';
 import { getUserCards } from './routes/getUserCards';
 import { processNuveiPayment } from './routes/processNuveiPayment';
 import { verifyNuveiOTP } from './routes/verifyNuveiOTP';
+import { deleteCardHandler } from './routes/deleteCard';
 import { sendPushNotification } from './routes/sendPushNotification';
 import { waitlistNotification } from './routes/waitlistNotification';
 import { forgotPassword } from './routes/forgotPassword';
@@ -70,6 +71,7 @@ app.get('/health', (req, res) => {
 app.get('/api/get-user-cards', authMiddleware, getUserCards);
 app.post('/api/process-nuvei-payment', authMiddleware, processNuveiPayment);
 app.post('/api/verify-nuvei-otp', authMiddleware, verifyNuveiOTP);
+app.post('/api/delete-card', authMiddleware, deleteCardHandler);
 app.use('/api', authMiddleware, deleteAccountRouter);
 
 // Rutas de sistema (sin autenticación de usuario, pero con validación de service key)

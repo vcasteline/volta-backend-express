@@ -132,7 +132,7 @@ headers: {
 }
 ```
 
-## Monitoreo
+## Monitoreo 
 
 - Los logs se muestran en la consola
 - Endpoint `/health` para verificar el estado del servidor

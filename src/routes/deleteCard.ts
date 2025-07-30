@@ -3,12 +3,14 @@ import { deleteCard } from '../utils/nuvei';
 
 export async function deleteCardHandler(req: Request, res: Response) {
   try {
-    const { cardToken } = req.body;
-    const userId = req.user?.id;
+    const { cardToken, userId } = req.body;
+    // userId viene del frontend (cédula), no usar req.user.id
 
     console.log('🗑️ Solicitud para eliminar tarjeta:', {
-      userId,
-      cardToken: cardToken?.substring(0, 10) + '...'
+      userId, // Cédula del usuario (para Nuvei)
+      userIdType: typeof userId,
+      cardToken: cardToken?.substring(0, 10) + '...',
+      supabaseUserId: req.user?.id // UUID de Supabase (solo para verificar auth)
     });
 
     // Validación de parámetros
@@ -20,6 +22,14 @@ export async function deleteCardHandler(req: Request, res: Response) {
     }
 
     if (!userId) {
+      return res.status(400).json({
+        success: false,
+        error: 'El userId (cédula) es requerido'
+      });
+    }
+
+    // Verificar que el usuario esté autenticado
+    if (!req.user?.id) {
       return res.status(401).json({
         success: false,
         error: 'Usuario no autenticado'

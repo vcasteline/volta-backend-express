@@ -3,20 +3,35 @@ import { supabase } from '../index';
 import { createNuveiAuthToken, generateIdempotencyId, NuveiPaymentResponse } from '../utils/nuvei';
 import { sendPurchaseConfirmationEmail } from '../utils/email';
 
+interface MenuPurchaseItem {
+  menuItemId: string;
+  quantity: number;
+  unitPrice: number;
+  name: string;
+}
+
 interface PaymentRequest {
-  packageId: string;
+  // Para compras de packages (existente)
+  packageId?: string;
+  credits?: number;
+  
+  // Para compras de menu (nuevo)
+  menuItems?: MenuPurchaseItem[];
+  purchaseType: 'package' | 'menu';
+  
+  // Campos comunes
   cardToken: string;
   amount: number;
   description: string;
   vat?: number;
-  credits?: number;
 }
 
 // Función para verificar y crear registro de transacción en progreso
 async function checkAndCreateTransactionLock(
   idempotencyId: string, 
   userId: string, 
-  packageId: string
+  packageId?: string,
+  purchaseType: 'package' | 'menu' = 'package'
 ): Promise<{ canProceed: boolean; existingTransaction?: any }> {
   
   // Primero buscar cualquier transacción con este idempotency_id
@@ -93,15 +108,22 @@ async function checkAndCreateTransactionLock(
   }
 
   // No existe transacción previa, crear nueva
+  const insertData: any = {
+    idempotency_id: idempotencyId,
+    user_id: userId,
+    status: 'in_progress',
+    purchase_type: purchaseType,
+    created_at: new Date().toISOString()
+  };
+
+  // Solo agregar package_id si es una compra de package
+  if (purchaseType === 'package' && packageId) {
+    insertData.package_id = packageId;
+  }
+
   const { error: insertError } = await supabase
     .from('payment_transactions')
-    .insert({
-      idempotency_id: idempotencyId,
-      user_id: userId,
-      package_id: packageId,
-      status: 'in_progress',
-      created_at: new Date().toISOString()
-    });
+    .insert(insertData);
 
   if (insertError) {
     console.error('Error creating new transaction:', insertError);
@@ -170,7 +192,8 @@ async function createPurchaseAndUpdateTransaction(
     p_credits_remaining: credits,
     p_expiration_date: expirationDate,
     p_authorization_code: authorizationCode,
-    p_transaction_data: paymentResult
+    p_transaction_data: paymentResult,
+    p_transaction_id: paymentResult.transaction?.id || null
   });
 
   if (error) {
@@ -179,6 +202,42 @@ async function createPurchaseAndUpdateTransaction(
   }
 
   console.log('✅ Compra y transacción creadas atómicamente');
+}
+
+// Función ATÓMICA para crear compra de menu y actualizar transacción
+async function createMenuPurchaseAndUpdateTransaction(
+  idempotencyId: string,
+  userId: string,
+  menuItems: MenuPurchaseItem[],
+  totalPaid: number,
+  authorizationCode: string,
+  paymentResult: any
+): Promise<void> {
+  // Convertir menuItems al formato esperado por la RPC
+  const itemsForRPC = menuItems.map(item => ({
+    menu_item_id: item.menuItemId,
+    quantity: item.quantity,
+    unit_price: item.unitPrice,
+    name: item.name
+  }));
+
+  // Ejecutar transacción atómica usando PostgreSQL
+  const { error } = await supabase.rpc('create_menu_purchase_atomic', {
+    p_idempotency_id: idempotencyId,
+    p_user_id: userId,
+    p_items: itemsForRPC,
+    p_total_paid: totalPaid,
+    p_authorization_code: authorizationCode,
+    p_transaction_data: paymentResult,
+    p_transaction_id: paymentResult.transaction?.id || null
+  });
+
+  if (error) {
+    console.error('Error en transacción atómica de menu:', error);
+    throw new Error(`Error atómico registrando compra de menu: ${error.message}`);
+  }
+
+  console.log('✅ Compra de menu y transacción creadas atómicamente');
 }
 
 // Función para crear registro de compra (LEGACY - mantener para compatibilidad)
@@ -216,13 +275,45 @@ export const processNuveiPayment = async (req: Request, res: Response) => {
   try {
     const user = (req as any).user;
     const body: PaymentRequest = req.body;
-    const { packageId, cardToken, amount, description, vat, credits } = body;
+    const { packageId, cardToken, amount, description, vat, credits, menuItems, purchaseType = 'package' } = body;
 
-    // Validaciones
-    if (!packageId || !cardToken || !amount || !description) {
+    // Validaciones básicas
+    if (!cardToken || !amount || !description) {
       return res.status(400).json({
         success: false,
-        error: 'Missing required fields: packageId, cardToken, amount, description'
+        error: 'Missing required fields: cardToken, amount, description'
+      });
+    }
+
+    // Validaciones específicas por tipo de compra
+    if (purchaseType === 'package') {
+      if (!packageId) {
+        return res.status(400).json({
+          success: false,
+          error: 'packageId is required for package purchases'
+        });
+      }
+    } else if (purchaseType === 'menu') {
+      if (!menuItems || !Array.isArray(menuItems) || menuItems.length === 0) {
+        return res.status(400).json({
+          success: false,
+          error: 'menuItems array is required for menu purchases'
+        });
+      }
+      
+      // Validar cada item del menu
+      for (const item of menuItems) {
+        if (!item.menuItemId || !item.quantity || !item.unitPrice || !item.name) {
+          return res.status(400).json({
+            success: false,
+            error: 'Each menu item must have menuItemId, quantity, unitPrice, and name'
+          });
+        }
+      }
+    } else {
+      return res.status(400).json({
+        success: false,
+        error: 'purchaseType must be either "package" or "menu"'
       });
     }
 
@@ -235,30 +326,58 @@ export const processNuveiPayment = async (req: Request, res: Response) => {
     // Obtener la cédula del usuario
     const { data: userData, error: userError } = await supabase
       .from('users')
-      .select('cedula')
+      .select('username')
       .eq('id', user.id)
       .single();
 
-    if (userError || !userData?.cedula) {
-      throw new Error('User cedula not found');
+    if (userError || !userData?.username) {
+      throw new Error('User username not found');
     }
 
-    // Obtener información del paquete
-    const { data: packageData, error: packageError } = await supabase
-      .from('packages')
-      .select('*')
-      .eq('id', packageId)
-      .single();
+    // Obtener información del paquete o menu según el tipo
+    let packageData = null;
+    let menuData = null;
 
-    if (packageError || !packageData) {
-      throw new Error('Package not found');
+    if (purchaseType === 'package') {
+      const { data: pkgData, error: packageError } = await supabase
+        .from('packages')
+        .select('*')
+        .eq('id', packageId)
+        .single();
+
+      if (packageError || !pkgData) {
+        throw new Error('Package not found');
+      }
+      packageData = pkgData;
+    } else if (purchaseType === 'menu') {
+      // Validar que todos los menu items existan
+      const menuItemIds = menuItems!.map(item => item.menuItemId);
+      const { data: menuItemsData, error: menuError } = await supabase
+        .from('menu')
+        .select('*')
+        .in('id', menuItemIds);
+
+      if (menuError || !menuItemsData || menuItemsData.length !== menuItemIds.length) {
+        throw new Error('One or more menu items not found');
+      }
+      menuData = menuItemsData;
     }
 
     // Generar ID de idempotencia
-    const idempotencyId = generateIdempotencyId(user.id, packageId, cardToken, amount);
+    const idempotencyId = generateIdempotencyId(
+      user.id, 
+      packageId || menuItems?.map(i => i.menuItemId).join(',') || '', 
+      cardToken, 
+      amount
+    );
 
     // Verificar y crear lock de transacción
-    const transactionLock = await checkAndCreateTransactionLock(idempotencyId, user.id, packageId);
+    const transactionLock = await checkAndCreateTransactionLock(
+      idempotencyId, 
+      user.id, 
+      packageId, 
+      purchaseType
+    );
 
     if (!transactionLock.canProceed) {
       if (transactionLock.existingTransaction) {
@@ -284,7 +403,7 @@ export const processNuveiPayment = async (req: Request, res: Response) => {
       // Preparar datos del pago
       const paymentPayload = {
         user: {
-          id: userData.cedula,
+          id: userData.username,
           email: user.email || ''
         },
         order: {
@@ -342,40 +461,75 @@ export const processNuveiPayment = async (req: Request, res: Response) => {
         
         try {
           // SOLUCIÓN ATÓMICA: Crear compra y actualizar estado en una sola transacción
-          await createPurchaseAndUpdateTransaction(
-            idempotencyId,
-            user.id,
-            packageId,
-            packageData,
-            credits || packageData.class_credits,
-            paymentResult.transaction.authorization_code || '',
-            paymentResult
-          );
+          if (purchaseType === 'package') {
+            await createPurchaseAndUpdateTransaction(
+              idempotencyId,
+              user.id,
+              packageId!,
+              packageData!,
+              credits || packageData!.class_credits,
+              paymentResult.transaction.authorization_code || '',
+              paymentResult
+            );
+          } else if (purchaseType === 'menu') {
+            await createMenuPurchaseAndUpdateTransaction(
+              idempotencyId,
+              user.id,
+              menuItems!,
+              amount,
+              paymentResult.transaction.authorization_code || '',
+              paymentResult
+            );
+          }
 
           // Enviar email de confirmación de compra
-          const emailResult = await sendPurchaseConfirmationEmail({
-            user: {
-              email: user.email || '',
-              name: user.user_metadata?.name || user.email || 'Cliente'
-            },
-            packageName: packageData.name,
-            credits: credits || packageData.class_credits,
-            amount: amount,
-            purchaseDate: new Date().toLocaleDateString('es-ES', {
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric',
-              hour: '2-digit',
-              minute: '2-digit'
-            }),
-            expirationDate: packageData.expiration_days ? 
-              new Date(Date.now() + (packageData.expiration_days * 24 * 60 * 60 * 1000)).toLocaleDateString('es-ES', {
+          let emailResult;
+          if (purchaseType === 'package') {
+            emailResult = await sendPurchaseConfirmationEmail({
+              user: {
+                email: user.email || '',
+                name: user.user_metadata?.name || user.email || 'Cliente'
+              },
+              packageName: packageData!.name,
+              credits: credits || packageData!.class_credits,
+              amount: amount,
+              purchaseDate: new Date().toLocaleDateString('es-ES', {
                 year: 'numeric',
                 month: 'long',
-                day: 'numeric'
-              }) : undefined,
-            authorizationCode: paymentResult.transaction.authorization_code || ''
-          });
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+              }),
+              expirationDate: packageData!.expiration_days ? 
+                new Date(Date.now() + (packageData!.expiration_days * 24 * 60 * 60 * 1000)).toLocaleDateString('es-ES', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric'
+                }) : undefined,
+              authorizationCode: paymentResult.transaction.authorization_code || ''
+            });
+          } else {
+            // Para menu purchases, usamos un email genérico por ahora
+            // TODO: Crear sendMenuPurchaseConfirmationEmail específico
+            const itemsDescription = menuItems!.map(item => `${item.quantity}x ${item.name}`).join(', ');
+            emailResult = await sendPurchaseConfirmationEmail({
+              user: {
+                email: user.email || '',
+                name: user.user_metadata?.name || user.email || 'Cliente'
+              },
+              packageName: `Menu: ${itemsDescription}`,
+              credits: 0, // Menu no tiene créditos
+              amount: amount,
+              purchaseDate: new Date().toLocaleDateString('es-ES', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+              }),
+              authorizationCode: paymentResult.transaction.authorization_code || ''
+            });
+          }
 
           if (!emailResult.success) {
             console.error('⚠️ Error enviando email de compra (no afecta la transacción):', emailResult.error);

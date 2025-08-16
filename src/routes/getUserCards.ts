@@ -6,29 +6,29 @@ export const getUserCards = async (req: Request, res: Response) => {
   try {
     const user = (req as any).user;
 
-    // Obtener la cédula del usuario desde la base de datos
+    // Obtener el username del usuario desde la base de datos
     const { data: userData, error: dbError } = await supabase
       .from('users')
-      .select('cedula')
+      .select('username')
       .eq('id', user.id)
       .single();
 
-    if (dbError || !userData?.cedula) {
-      throw new Error('User cedula not found');
+    if (dbError || !userData?.username) {
+      throw new Error('User username not found');
     }
 
-    const userCedula = userData.cedula;
+    const userUsername = userData.username;
 
     // Crear token de autenticación para Nuvei
     const authToken = createNuveiAuthToken();
     
     // URL de la API de Nuvei
     const nuveiBaseUrl = process.env.NUVEI_BASE_URL || 'https://ccapi-stg.paymentez.com';
-    const apiUrl = `${nuveiBaseUrl}/v2/card/list?uid=${encodeURIComponent(userCedula)}`;
+    const apiUrl = `${nuveiBaseUrl}/v2/card/list?uid=${encodeURIComponent(userUsername)}`;
     
     console.log('📞 Llamando a Nuvei API:', {
       url: apiUrl,
-      userCedula,
+      userUsername,
       hasAuthToken: !!authToken
     });
 

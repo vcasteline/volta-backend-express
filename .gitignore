@@ -9,6 +9,7 @@ dist/
 build/
 
 # Environment variables
+.cursor
 .env
 .env.local
 .env.development.local

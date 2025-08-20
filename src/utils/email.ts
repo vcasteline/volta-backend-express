@@ -23,7 +23,7 @@ function getResendClient(): { resend: Resend; apiKey: string } {
 }
 
 // Email domain configurado
-const FROM_EMAIL = 'no-reply@transactional.giroadmin.com';
+const FROM_EMAIL = 'no-reply@transactional.voltaec.com';
 
 export interface EmailUser {
   email: string;
@@ -84,85 +84,112 @@ const createPurchaseEmailTemplate = (data: PurchaseEmailData): string => {
     <head>
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Compra Confirmada - Giro</title>
+      <meta name="color-scheme" content="light">
+      <meta name="supported-color-schemes" content="light">
+      <title>Confirmación de Compra</title>
       <style>
-        body {
-          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-          line-height: 1.6;
-          color: #333;
-          max-width: 600px;
-          margin: 0 auto;
-          padding: 20px;
-        }
-        .header {
-          background: linear-gradient(135deg, #6658C1 0%, #B6FF1C 100%);
-          color: white;
-          padding: 30px;
-          text-align: center;
-          border-radius: 10px 10px 0 0;
-        }
-        .content {
-          background: white;
-          padding: 30px;
-          border: 1px solid #e0e0e0;
-          border-radius: 0 0 10px 10px;
-        }
-        .purchase-details {
-          background: #f8f9fa;
-          padding: 20px;
-          border-radius: 8px;
-          margin: 20px 0;
-        }
-        .highlight {
-          color: #6658C1;
-          font-weight: bold;
-        }
-        .footer {
-          text-align: center;
-          margin-top: 30px;
-          padding-top: 20px;
-          border-top: 1px solid #e0e0e0;
-          color: #666;
-        }
-        .btn {
-          display: inline-block;
-          background: #6658C1;
-          color: white;
-          padding: 12px 24px;
-          text-decoration: none;
-          border-radius: 8px;
-          margin: 20px 0;
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&display=swap');
       </style>
     </head>
-    <body>
-      <div class="header">
-        <h1>¡Compra Confirmada! 🎉</h1>
-        <p>Gracias por tu compra en Giro</p>
-      </div>
-      
-      <div class="content">
-        <h2>Hola ${data.user.name || 'Rider'}!</h2>
-        
-        <p>¡Tu compra ha sido procesada exitosamente! Ya puedes empezar a reservar tus clases.</p>
-        
-        <div class="purchase-details">
-          <h3>Detalles de tu compra:</h3>
-          <p><strong>Paquete:</strong> ${data.packageName}</p>
-          <p><strong>Créditos:</strong> <span class="highlight">${data.credits} clases</span></p>
-          <p><strong>Valor:</strong> $${data.amount.toFixed(2)}</p>
-          <p><strong>Fecha de compra:</strong> ${data.purchaseDate}</p>
-          ${data.expirationDate ? `<p><strong>Expiran el:</strong> ${data.expirationDate}</p>` : ''}
-          <p><strong>Código de autorización:</strong> ${data.authorizationCode}</p>
-        </div>
-        
-        <p>Puedes usar tus créditos para reservar clases en cualquier momento. ¡Nos vemos en el estudio! 🚴‍♀️</p>
-        
-        <div class="footer">
-          <p>¿Necesitas ayuda? Contáctanos en <strong>info@giroadmin.com</strong></p>
-          <p>Giro Studio - Tu estudio de spinning favorito</p>
-        </div>
-      </div>
+    <body style="font-family: 'Work Sans', Helvetica, Arial, sans-serif; margin: 0; padding: 0; background-color: #e9e9e9; color: #333333; -webkit-font-smoothing: antialiased;">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td align="center" style="padding: 40px 20px;">
+            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width: 600px; background-color: #e9e9e9;">
+              <!-- Logo -->
+              <tr>
+                <td align="center" style="padding-bottom: 30px;">
+                  <img src="https://mt5159g3si.ufs.sh/f/yBjaix5tW5pfBPQURnKdJoRQbl2LZmCtSih9E6FaWHqkPp5U" alt="Volta Logo" width="60" style="display: block;">
+                </td>
+              </tr>
+              
+              <!-- Título -->
+              <tr>
+                <td align="center" style="padding-bottom: 50px;">
+                  <h1 style="font-family: 'Work Sans', Helvetica, Arial, sans-serif; color: #000000; font-size: 28px; font-weight: 600; margin: 0;">¡Gracias por tu compra!</h1>
+                </td>
+              </tr>
+              
+              <!-- Información de la compra en bloques -->
+              <tr>
+                <td style="padding-bottom: 30px;">
+                  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                    <tr>
+                      <td style="background-color: #f8f9fa; border-radius: 12px; padding: 25px;">
+                        <h2 style="font-family: 'Work Sans', Helvetica, Arial, sans-serif; color: #000000; font-size: 20px; font-weight: 600; margin-top: 0; margin-bottom: 20px;">Detalles de tu compra</h2>
+                        
+                        <div style="margin-bottom: 15px;">
+                          <strong style="font-family: 'Work Sans', Arial, sans-serif; font-weight: 600; font-size: 16px;">Nombre:</strong> 
+                          <span style="font-family: 'Work Sans', Arial, sans-serif; font-size: 16px;">${data.user.name || 'Cliente'}</span>
+                        </div>
+                        
+                        <div style="margin-bottom: 15px;">
+                          <strong style="font-family: 'Work Sans', Arial, sans-serif; font-weight: 600; font-size: 16px;">Paquete:</strong> 
+                          <span style="font-family: 'Work Sans', Arial, sans-serif; font-size: 16px;">${data.credits} clases</span>
+                        </div>
+                        
+                        <div style="margin-bottom: 15px;">
+                          <strong style="font-family: 'Work Sans', Arial, sans-serif; font-weight: 600; font-size: 16px;">Fecha de compra:</strong> 
+                          <span style="font-family: 'Work Sans', Arial, sans-serif; font-size: 16px;">${data.purchaseDate}</span>
+                        </div>
+                        
+                        ${data.expirationDate ? `
+                        <div style="margin-bottom: 15px;">
+                          <strong style="font-family: 'Work Sans', Arial, sans-serif; font-weight: 600; font-size: 16px;">Fecha de expiración:</strong> 
+                          <span style="font-family: 'Work Sans', Arial, sans-serif; font-size: 16px;">${data.expirationDate}</span>
+                        </div>
+                        ` : ''}
+                        
+                        <div style="margin-bottom: 15px;">
+                          <strong style="font-family: 'Work Sans', Arial, sans-serif; font-weight: 600; font-size: 16px;">Código de autorización:</strong> 
+                          <span style="font-family: 'Work Sans', Arial, sans-serif; font-size: 16px;">${data.authorizationCode}</span>
+                        </div>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+              
+              <!-- Cómo usar en un bloque -->
+              <tr>
+                <td style="padding-bottom: 30px;">
+                  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                    <tr>
+                      <td style="background-color: #e8f4ff; border-radius: 12px; padding: 25px;">
+                        <h2 style="font-family: 'Work Sans', Helvetica, Arial, sans-serif; color: #000000; font-size: 20px; font-weight: 600; margin-top: 0; margin-bottom: 20px;">¿Cómo usar tus clases?</h2>
+                        
+                        <p style="font-family: 'Work Sans', Helvetica, Arial, sans-serif; font-size: 16px; line-height: 1.5; margin-bottom: 15px;">
+                          Tus ${data.credits} clases ya están disponibles en tu cuenta. Para reservar:
+                        </p>
+                        
+                        <ol style="font-family: 'Work Sans', Helvetica, Arial, sans-serif; font-size: 16px; line-height: 1.6; margin-top: 10px; padding-left: 25px;">
+                          <li style="margin-bottom: 8px;">Ingresa a la app de Volta</li>
+                          <li style="margin-bottom: 8px;">Selecciona la fecha y hora que prefieras</li>
+                          <li style="margin-bottom: 8px;">Elige tu bicicleta favorita</li>
+                          <li style="margin-bottom: 8px;">¡Listo! Te esperamos en clase</li>
+                        </ol>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+              
+              <!-- Footer -->
+              <tr>
+                <td style="text-align: center; padding-top: 20px;">
+                  <p style="font-family: 'Work Sans', Helvetica, Arial, sans-serif; font-size: 14px; line-height: 1.5; margin-bottom: 15px;">
+                    Si tienes alguna pregunta, contáctanos por WhatsApp al <a href="https://wa.me/593964193931" style="color: #3D4AF5; text-decoration: none;">+593 96 419 3931</a>
+                  </p>
+                  
+                  <p style="font-family: 'Work Sans', Helvetica, Arial, sans-serif; font-size: 14px; line-height: 1.5; margin-bottom: 15px; color: #777777;">
+                    &copy; ${new Date().getFullYear()} Volta. Todos los derechos reservados.
+                  </p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
     </body>
     </html>
   `;
@@ -296,90 +323,101 @@ const createPasswordResetEmailTemplate = (data: PasswordResetEmailData): string 
     <head>
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Recuperar Contraseña - Giro</title>
+      <meta name="color-scheme" content="light">
+      <meta name="supported-color-schemes" content="light">
+      <title>Recuperar Contraseña</title>
       <style>
-        body {
-          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-          line-height: 1.6;
-          color: #333;
-          max-width: 600px;
-          margin: 0 auto;
-          padding: 20px;
-        }
-        .header {
-          background: linear-gradient(135deg, #6658C1 0%, #B6FF1C 100%);
-          color: white;
-          padding: 30px;
-          text-align: center;
-          border-radius: 10px 10px 0 0;
-        }
-        .content {
-          background: white;
-          padding: 30px;
-          border: 1px solid #e0e0e0;
-          border-radius: 0 0 10px 10px;
-        }
-        .btn {
-          display: inline-block;
-          background: #6658C1;
-          color: white;
-          padding: 15px 30px;
-          text-decoration: none;
-          border-radius: 8px;
-          margin: 20px 0;
-          font-weight: bold;
-        }
-        .footer {
-          text-align: center;
-          margin-top: 30px;
-          padding-top: 20px;
-          border-top: 1px solid #e0e0e0;
-          color: #666;
-        }
-        .warning {
-          background: #fff3cd;
-          color: #856404;
-          padding: 15px;
-          border-radius: 8px;
-          margin: 20px 0;
-          border: 1px solid #ffeaa7;
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&display=swap');
       </style>
     </head>
-    <body>
-      <div class="header">
-        <h1>Recuperar Contraseña</h1>
-        <p>Restablecer tu contraseña de Giro</p>
-      </div>
-      
-      <div class="content">
-        <h2>Hola ${data.user.name || 'Rider'}!</h2>
-        
-        <p>Recibimos una solicitud para restablecer la contraseña de tu cuenta en Giro.</p>
-        
-        <p>Haz clic en el botón de abajo para crear una nueva contraseña:</p>
-        
-        <div style="text-align: center;">
-          <a href="${data.resetUrl}" class="btn">Cambiar Contraseña</a>
-        </div>
-        
-        <div class="warning">
-          <p><strong>⚠️ Importante:</strong></p>
-          <ul>
-            <li>Este enlace expira en 1 hora</li>
-            <li>Solo puedes usar este enlace una vez</li>
-            <li>Si no solicitaste este cambio, puedes ignorar este email</li>
-          </ul>
-        </div>
-        
-        <p>Si el botón no funciona, puedes copiar y pegar este enlace en tu navegador:</p>
-        <p style="word-break: break-all; color: #666;"><small>${data.resetUrl}</small></p>
-        
-        <div class="footer">
-          <p>¿Necesitas ayuda? Contáctanos en <strong>info@giroadmin.com</strong></p>
-          <p>Giro Studio - Tu estudio de spinning favorito</p>
-        </div>
-      </div>
+    <body style="font-family: 'Work Sans', Helvetica, Arial, sans-serif; margin: 0; padding: 0; background-color: #e9e9e9; color: #333333; -webkit-font-smoothing: antialiased;">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td align="center" style="padding: 40px 20px;">
+            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width: 600px; background-color: #e9e9e9;">
+              <!-- Logo -->
+              <tr>
+                <td align="center" style="padding-bottom: 30px;">
+                  <img src="https://mt5159g3si.ufs.sh/f/yBjaix5tW5pfBPQURnKdJoRQbl2LZmCtSih9E6FaWHqkPp5U" alt="Volta Logo" width="60" style="display: block;">
+                </td>
+              </tr>
+              
+              <!-- Título -->
+              <tr>
+                <td align="center" style="padding-bottom: 50px;">
+                  <h1 style="font-family: 'Work Sans', Helvetica, Arial, sans-serif; color: #000000; font-size: 28px; font-weight: 600; margin: 0;">Recuperar contraseña</h1>
+                </td>
+              </tr>
+              
+              <!-- Contenido principal -->
+              <tr>
+                <td style="padding-bottom: 30px;">
+                  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                    <tr>
+                      <td style="background-color: #f8f9fa; border-radius: 12px; padding: 25px;">
+                        <p style="font-family: 'Work Sans', Helvetica, Arial, sans-serif; font-size: 16px; line-height: 1.5; margin-bottom: 20px; margin-top: 0;">
+                          Hola <strong>${data.user.name || 'Cliente'}</strong>,
+                        </p>
+                        
+                        <p style="font-family: 'Work Sans', Helvetica, Arial, sans-serif; font-size: 16px; line-height: 1.5; margin-bottom: 20px;">
+                          Recibimos una solicitud para restablecer la contraseña de tu cuenta en Volta.
+                        </p>
+                        
+                        <p style="font-family: 'Work Sans', Helvetica, Arial, sans-serif; font-size: 16px; line-height: 1.5; margin-bottom: 25px;">
+                          Haz clic en el botón de abajo para crear una nueva contraseña:
+                        </p>
+                        
+                        <div style="text-align: center; margin: 30px 0;">
+                          <a href="${data.resetUrl}" style="display: inline-block; background-color: #3D4AF5; color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-family: 'Work Sans', Arial, sans-serif; font-size: 16px; font-weight: 600;">Cambiar Contraseña</a>
+                        </div>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+              
+              <!-- Información importante -->
+              <tr>
+                <td style="padding-bottom: 30px;">
+                  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                    <tr>
+                      <td style="background-color: #e8f4ff; border-radius: 12px; padding: 25px;">
+                        <h2 style="font-family: 'Work Sans', Helvetica, Arial, sans-serif; color: #000000; font-size: 20px; font-weight: 600; margin-top: 0; margin-bottom: 20px;">⚠️ Información importante</h2>
+                        
+                        <ul style="font-family: 'Work Sans', Helvetica, Arial, sans-serif; font-size: 14px; line-height: 1.6; margin: 0; padding-left: 20px;">
+                          <li style="margin-bottom: 8px;">Este enlace expira en 1 hora</li>
+                          <li style="margin-bottom: 8px;">Solo puedes usar este enlace una vez</li>
+                          <li style="margin-bottom: 8px;">Si no solicitaste este cambio, puedes ignorar este email</li>
+                        </ul>
+                        
+                        <p style="font-family: 'Work Sans', Helvetica, Arial, sans-serif; font-size: 14px; line-height: 1.5; margin-top: 15px; margin-bottom: 0;">
+                          Si el botón no funciona, puedes copiar y pegar este enlace en tu navegador:
+                        </p>
+                        <p style="font-family: 'Work Sans', Helvetica, Arial, sans-serif; font-size: 12px; word-break: break-all; color: #666; margin: 10px 0 0 0;">
+                          ${data.resetUrl}
+                        </p>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+              
+              <!-- Footer -->
+              <tr>
+                <td style="text-align: center; padding-top: 20px;">
+                  <p style="font-family: 'Work Sans', Helvetica, Arial, sans-serif; font-size: 14px; line-height: 1.5; margin-bottom: 15px;">
+                    Si tienes alguna pregunta, contáctanos por WhatsApp al <a href="https://wa.me/593964193931" style="color: #3D4AF5; text-decoration: none;">+593 96 419 3931</a>
+                  </p>
+                  
+                  <p style="font-family: 'Work Sans', Helvetica, Arial, sans-serif; font-size: 14px; line-height: 1.5; margin-bottom: 15px; color: #777777;">
+                    &copy; ${new Date().getFullYear()} Volta. Todos los derechos reservados.
+                  </p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
     </body>
     </html>
   `;
@@ -512,99 +550,101 @@ const createPasswordResetCodeEmailTemplate = (data: PasswordResetCodeEmailData):
     <head>
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Código de Recuperación - Giro</title>
+      <meta name="color-scheme" content="light">
+      <meta name="supported-color-schemes" content="light">
+      <title>Código de Recuperación</title>
       <style>
-        body {
-          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-          line-height: 1.6;
-          color: #333;
-          max-width: 600px;
-          margin: 0 auto;
-          padding: 20px;
-        }
-        .header {
-          background: linear-gradient(135deg, #6658C1 0%, #B6FF1C 100%);
-          color: white;
-          padding: 30px;
-          text-align: center;
-          border-radius: 10px 10px 0 0;
-        }
-        .content {
-          background: white;
-          padding: 30px;
-          border: 1px solid #e0e0e0;
-          border-radius: 0 0 10px 10px;
-          text-align: center;
-        }
-        .code-container {
-          background: #f8f9fa;
-          border: 2px solid #6658C1;
-          border-radius: 12px;
-          padding: 30px;
-          margin: 30px 0;
-          text-align: center;
-        }
-        .code {
-          font-size: 36px;
-          font-weight: bold;
-          color: #6658C1;
-          letter-spacing: 8px;
-          margin: 10px 0;
-          font-family: 'Courier New', monospace;
-        }
-        .warning {
-          background: #fff3cd;
-          color: #856404;
-          padding: 15px;
-          border-radius: 8px;
-          margin: 20px 0;
-          border: 1px solid #ffeaa7;
-          text-align: left;
-        }
-        .footer {
-          text-align: center;
-          margin-top: 30px;
-          padding-top: 20px;
-          border-top: 1px solid #e0e0e0;
-          color: #666;
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&display=swap');
       </style>
     </head>
-    <body>
-      <div class="header">
-        <h1>Código de Recuperación</h1>
-        <p>Restablecer tu contraseña de Giro</p>
-      </div>
-      
-      <div class="content">
-        <h2>Hola ${data.user.name || 'Rider'}!</h2>
-        
-        <p>Recibimos una solicitud para restablecer la contraseña de tu cuenta en Giro.</p>
-        
-        <p>Ingresa el siguiente código de verificación en la app:</p>
-        
-        <div class="code-container">
-          <p style="margin: 0; font-size: 14px; color: #666;">Tu código de verificación es:</p>
-          <div class="code">${data.resetCode}</div>
-        </div>
-        
-        <div class="warning">
-          <p><strong>⚠️ Importante:</strong></p>
-          <ul>
-            <li>Este código expira en ${data.expiresInMinutes} minutos</li>
-            <li>Solo puedes usar este código una vez</li>
-            <li>Si no solicitaste este cambio, puedes ignorar este email</li>
-            <li>No compartas este código con nadie</li>
-          </ul>
-        </div>
-        
-        <p>Si no solicitaste este cambio, tu cuenta permanece segura y puedes ignorar este email.</p>
-        
-        <div class="footer">
-          <p>¿Necesitas ayuda? Contáctanos en <strong>info@giroadmin.com</strong></p>
-          <p>Giro Studio - Tu estudio de spinning favorito</p>
-        </div>
-      </div>
+    <body style="font-family: 'Work Sans', Helvetica, Arial, sans-serif; margin: 0; padding: 0; background-color: #e9e9e9; color: #333333; -webkit-font-smoothing: antialiased;">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td align="center" style="padding: 40px 20px;">
+            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width: 600px; background-color: #e9e9e9;">
+              <!-- Logo -->
+              <tr>
+                <td align="center" style="padding-bottom: 30px;">
+                  <img src="https://mt5159g3si.ufs.sh/f/yBjaix5tW5pfBPQURnKdJoRQbl2LZmCtSih9E6FaWHqkPp5U" alt="Volta Logo" width="60" style="display: block;">
+                </td>
+              </tr>
+              
+              <!-- Título -->
+              <tr>
+                <td align="center" style="padding-bottom: 50px;">
+                  <h1 style="font-family: 'Work Sans', Helvetica, Arial, sans-serif; color: #000000; font-size: 28px; font-weight: 600; margin: 0;">Código de recuperación</h1>
+                </td>
+              </tr>
+              
+              <!-- Contenido principal -->
+              <tr>
+                <td style="padding-bottom: 30px;">
+                  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                    <tr>
+                      <td style="background-color: #f8f9fa; border-radius: 12px; padding: 25px; text-align: center;">
+                        <p style="font-family: 'Work Sans', Helvetica, Arial, sans-serif; font-size: 16px; line-height: 1.5; margin-bottom: 20px; margin-top: 0;">
+                          Hola <strong>${data.user.name || 'Cliente'}</strong>,
+                        </p>
+                        
+                        <p style="font-family: 'Work Sans', Helvetica, Arial, sans-serif; font-size: 16px; line-height: 1.5; margin-bottom: 20px;">
+                          Recibimos una solicitud para restablecer la contraseña de tu cuenta en Volta.
+                        </p>
+                        
+                        <p style="font-family: 'Work Sans', Helvetica, Arial, sans-serif; font-size: 16px; line-height: 1.5; margin-bottom: 25px;">
+                          Ingresa el siguiente código de verificación en la app:
+                        </p>
+                        
+                        <!-- Código -->
+                        <div style="background-color: #e8f4ff; border: 2px solid #3D4AF5; border-radius: 12px; padding: 30px; margin: 30px 0; text-align: center;">
+                          <p style="font-family: 'Work Sans', Arial, sans-serif; font-size: 14px; color: #666; margin: 0 0 10px 0;">Tu código de verificación es:</p>
+                          <div style="font-size: 36px; font-weight: 700; color: #3D4AF5; letter-spacing: 8px; margin: 10px 0; font-family: 'Courier New', monospace;">${data.resetCode}</div>
+                        </div>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+              
+              <!-- Información importante -->
+              <tr>
+                <td style="padding-bottom: 30px;">
+                  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                    <tr>
+                      <td style="background-color: #e8f4ff; border-radius: 12px; padding: 25px;">
+                        <h2 style="font-family: 'Work Sans', Helvetica, Arial, sans-serif; color: #000000; font-size: 20px; font-weight: 600; margin-top: 0; margin-bottom: 20px;">⚠️ Información importante</h2>
+                        
+                        <ul style="font-family: 'Work Sans', Helvetica, Arial, sans-serif; font-size: 14px; line-height: 1.6; margin: 0; padding-left: 20px;">
+                          <li style="margin-bottom: 8px;">Este código expira en ${data.expiresInMinutes} minutos</li>
+                          <li style="margin-bottom: 8px;">Solo puedes usar este código una vez</li>
+                          <li style="margin-bottom: 8px;">Si no solicitaste este cambio, puedes ignorar este email</li>
+                          <li style="margin-bottom: 8px;">No compartas este código con nadie</li>
+                        </ul>
+                        
+                        <p style="font-family: 'Work Sans', Helvetica, Arial, sans-serif; font-size: 14px; line-height: 1.5; margin-top: 15px; margin-bottom: 0;">
+                          Si no solicitaste este cambio, tu cuenta permanece segura y puedes ignorar este email.
+                        </p>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+              
+              <!-- Footer -->
+              <tr>
+                <td style="text-align: center; padding-top: 20px;">
+                  <p style="font-family: 'Work Sans', Helvetica, Arial, sans-serif; font-size: 14px; line-height: 1.5; margin-bottom: 15px;">
+                    Si tienes alguna pregunta, contáctanos por WhatsApp al <a href="https://wa.me/593964193931" style="color: #3D4AF5; text-decoration: none;">+593 96 419 3931</a>
+                  </p>
+                  
+                  <p style="font-family: 'Work Sans', Helvetica, Arial, sans-serif; font-size: 14px; line-height: 1.5; margin-bottom: 15px; color: #777777;">
+                    &copy; ${new Date().getFullYear()} Volta. Todos los derechos reservados.
+                  </p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
     </body>
     </html>
   `;
@@ -619,7 +659,7 @@ export async function sendPurchaseConfirmationEmail(data: PurchaseEmailData): Pr
     const { data: result, error } = await resend.emails.send({
       from: FROM_EMAIL,
       to: [data.user.email],
-      subject: `¡Compra confirmada! ${data.packageName} - Giro`,
+      subject: 'Gracias por tu compra en Volta',
       html: createPurchaseEmailTemplate(data),
     });
 
@@ -645,7 +685,7 @@ export async function sendReservationConfirmationEmail(data: ReservationEmailDat
     const { data: result, error } = await resend.emails.send({
       from: FROM_EMAIL,
       to: [data.user.email],
-      subject: `Reserva confirmada: ${data.className || `Giro con ${data.instructorName}`} - Giro`,
+      subject: `Reserva confirmada: ${data.className || `Rueda con ${data.instructorName}`}`,
       html: createReservationEmailTemplate(data),
     });
 
@@ -671,7 +711,7 @@ export async function sendPasswordResetEmail(data: PasswordResetEmailData): Prom
     const { data: result, error } = await resend.emails.send({
       from: FROM_EMAIL,
       to: [data.user.email],
-      subject: 'Recuperar contraseña - Giro',
+      subject: 'Recuperar contraseña - Volta',
       html: createPasswordResetEmailTemplate(data),
     });
 
@@ -697,7 +737,7 @@ export async function sendPasswordResetCodeEmail(data: PasswordResetCodeEmailDat
     const { data: result, error } = await resend.emails.send({
       from: FROM_EMAIL,
       to: [data.user.email],
-      subject: 'Código de recuperación - Giro',
+      subject: 'Código de recuperación - Volta',
       html: createPasswordResetCodeEmailTemplate(data),
     });
 

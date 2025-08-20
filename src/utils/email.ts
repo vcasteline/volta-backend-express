@@ -22,8 +22,8 @@ function getResendClient(): { resend: Resend; apiKey: string } {
   return { resend, apiKey: resendApiKey };
 }
 
-// Email domain configurado
-const FROM_EMAIL = 'no-reply@transactional.voltaec.com';
+// Email domain configurado con nombre de sender
+const FROM_EMAIL = 'Volta EC <hola@transactional.voltaec.com>';
 
 export interface EmailUser {
   email: string;

@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { supabase } from '../index';
 import { createNuveiAuthToken, generateIdempotencyId, NuveiPaymentResponse } from '../utils/nuvei';
-import { sendPurchaseConfirmationEmail } from '../utils/email';
+import { sendPurchaseConfirmationEmail, sendMenuPurchaseConfirmationEmail } from '../utils/email';
 
 interface MenuPurchaseItem {
   menuItemId: string;
@@ -509,17 +509,18 @@ export const processNuveiPayment = async (req: Request, res: Response) => {
               authorizationCode: paymentResult.transaction.authorization_code || ''
             });
           } else {
-            // Para menu purchases, usamos un email genérico por ahora
-            // TODO: Crear sendMenuPurchaseConfirmationEmail específico
-            const itemsDescription = menuItems!.map(item => `${item.quantity}x ${item.name}`).join(', ');
-            emailResult = await sendPurchaseConfirmationEmail({
+            // Para menu purchases, usar el email específico de Volta
+            emailResult = await sendMenuPurchaseConfirmationEmail({
               user: {
                 email: user.email || '',
                 name: user.user_metadata?.name || user.email || 'Cliente'
               },
-              packageName: `Menu: ${itemsDescription}`,
-              credits: 0, // Menu no tiene créditos
-              amount: amount,
+              items: menuItems!.map(item => ({
+                name: item.name,
+                quantity: item.quantity,
+                unitPrice: item.unitPrice
+              })),
+              totalAmount: amount,
               purchaseDate: new Date().toLocaleDateString('es-ES', {
                 year: 'numeric',
                 month: 'long',

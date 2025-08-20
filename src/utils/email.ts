@@ -40,6 +40,20 @@ export interface PurchaseEmailData {
   authorizationCode: string;
 }
 
+export interface MenuPurchaseItem {
+  name: string;
+  quantity: number;
+  unitPrice: number;
+}
+
+export interface MenuPurchaseEmailData {
+  user: EmailUser;
+  items: MenuPurchaseItem[];
+  totalAmount: number;
+  purchaseDate: string;
+  authorizationCode: string;
+}
+
 export interface ReservationEmailData {
   user: EmailUser;
   className: string;
@@ -155,93 +169,121 @@ const createPurchaseEmailTemplate = (data: PurchaseEmailData): string => {
 };
 
 const createReservationEmailTemplate = (data: ReservationEmailData): string => {
+  const bicyclesList = data.bikeNumbers || [];
+  const fechaReserva = data.classDate;
+  const horaReserva = data.classTime;
+  const instructorName = data.instructorName;
+
   return `
     <!DOCTYPE html>
     <html lang="es">
     <head>
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Reserva Confirmada - Giro</title>
+      <meta name="color-scheme" content="light">
+      <meta name="supported-color-schemes" content="light">
+      <title>Confirmación de Reserva</title>
       <style>
-        body {
-          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-          line-height: 1.6;
-          color: #333;
-          max-width: 600px;
-          margin: 0 auto;
-          padding: 20px;
-        }
-        .header {
-          background: linear-gradient(135deg, #6658C1 0%, #B6FF1C 100%);
-          color: white;
-          padding: 30px;
-          text-align: center;
-          border-radius: 10px 10px 0 0;
-        }
-        .content {
-          background: white;
-          padding: 30px;
-          border: 1px solid #e0e0e0;
-          border-radius: 0 0 10px 10px;
-        }
-        .class-details {
-          background: #f8f9fa;
-          padding: 20px;
-          border-radius: 8px;
-          margin: 20px 0;
-        }
-        .highlight {
-          color: #6658C1;
-          font-weight: bold;
-        }
-        .footer {
-          text-align: center;
-          margin-top: 30px;
-          padding-top: 20px;
-          border-top: 1px solid #e0e0e0;
-          color: #666;
-        }
-        .bikes {
-          background: #B6FF1C;
-          color: #333;
-          padding: 8px 12px;
-          border-radius: 6px;
-          display: inline-block;
-          margin: 5px 0;
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&display=swap');
       </style>
     </head>
-    <body>
-      <div class="header">
-        <h1>¡Reserva Confirmada! 🚴‍♀️</h1>
-        <p>Te esperamos en el estudio</p>
-      </div>
-      
-      <div class="content">
-        <h2>Hola ${data.user.name || 'Rider'}!</h2>
-        
-        <p>Tu reserva ha sido confirmada exitosamente. ¡Prepárate para una clase increíble!</p>
-        
-        <div class="class-details">
-          <h3>Detalles de tu clase:</h3>
-          <p><strong>Clase:</strong> ${data.className || `Giro con ${data.instructorName}`}</p>
-          <p><strong>Instructor:</strong> <span class="highlight">${data.instructorName}</span></p>
-          <p><strong>Fecha:</strong> ${data.classDate}</p>
-          <p><strong>Hora:</strong> ${data.classTime}</p>
-          ${data.bikeNumbers && data.bikeNumbers.length > 0 ? 
-            `<p><strong>Bicicletas:</strong> <span class="bikes">${data.bikeNumbers.join(', ')}</span></p>` : 
-            ''
-          }
-          <p><strong>Reservado el:</strong> ${data.reservationDate}</p>
-        </div>
-        
-        <p><strong>Recordatorio:</strong> Llega 15 minutos antes de la clase para el check-in. ¡Trae tu botella de agua y toalla!</p>
-        
-        <div class="footer">
-          <p>¿Necesitas cancelar o modificar tu reserva? Contáctanos en <strong>info@giroadmin.com</strong></p>
-          <p>Giro Studio - Tu estudio de spinning favorito</p>
-        </div>
-      </div>
+    <body style="font-family: 'Work Sans', Helvetica, Arial, sans-serif; margin: 0; padding: 0; background-color: #e9e9e9; color: #333333; -webkit-font-smoothing: antialiased;">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td align="center" style="padding: 40px 20px;">
+            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width: 600px; background-color: #e9e9e9;">
+              <!-- Logo -->
+              <tr>
+                <td align="center" style="padding-bottom: 30px;">
+                  <img src="https://mt5159g3si.ufs.sh/f/yBjaix5tW5pfBPQURnKdJoRQbl2LZmCtSih9E6FaWHqkPp5U" alt="Volta Logo" width="60" style="display: block;">
+                </td>
+              </tr>
+              
+              <!-- Título -->
+              <tr>
+                <td align="center" style="padding-bottom: 50px;">
+                  <h1 style="font-family: 'Work Sans', Helvetica, Arial, sans-serif; color: #000000; font-size: 28px; font-weight: 600; margin: 0;">Lista para dar una Volta</h1>
+                </td>
+              </tr>
+              
+              <!-- Información de reserva -->
+              <tr>
+                <td style="padding-bottom: 30px;">
+                  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                    <tr>
+                      <td style="background-color: #f8f9fa; border-radius: 12px; padding: 25px;">
+                        <h2 style="font-family: 'Work Sans', Helvetica, Arial, sans-serif; color: #000000; font-size: 20px; font-weight: 600; margin-top: 0; margin-bottom: 20px;">Detalles de tu reserva</h2>
+                        
+                        <div style="margin-bottom: 15px;">
+                          <strong style="font-family: 'Work Sans', Arial, sans-serif; font-weight: 600; font-size: 16px;">Bici${bicyclesList.length > 1 ? 's' : ''}:</strong> 
+                          <span style="font-family: 'Work Sans', Arial, sans-serif; font-size: 16px;">${bicyclesList.length > 0 ? bicyclesList.join(', ') : '?'}</span>
+                        </div>
+                        
+                        <div style="margin-bottom: 15px;">
+                          <strong style="font-family: 'Work Sans', Arial, sans-serif; font-weight: 600; font-size: 16px;">Día:</strong> 
+                          <span style="font-family: 'Work Sans', Arial, sans-serif; font-size: 16px;">${fechaReserva}</span>
+                        </div>
+                        
+                        <div style="margin-bottom: 15px;">
+                          <strong style="font-family: 'Work Sans', Arial, sans-serif; font-weight: 600; font-size: 16px;">Hora:</strong> 
+                          <span style="font-family: 'Work Sans', Arial, sans-serif; font-size: 16px;">${horaReserva}</span>
+                        </div>
+                        
+                        <div style="margin-bottom: 15px;">
+                          <strong style="font-family: 'Work Sans', Arial, sans-serif; font-weight: 600; font-size: 16px;">Instructor:</strong> 
+                          <span style="font-family: 'Work Sans', Arial, sans-serif; font-size: 16px;">${instructorName}</span>
+                        </div>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+              
+              <!-- Políticas en bloques -->
+              <tr>
+                <td style="padding-bottom: 30px;">
+                  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                    <tr>
+                      <td style="background-color: #e8f4ff; border-radius: 12px; padding: 25px;">
+                        <h2 style="font-family: 'Work Sans', Helvetica, Arial, sans-serif; color: #000000; font-size: 20px; font-weight: 600; margin-top: 0; margin-bottom: 20px;">Políticas importantes</h2>
+                        
+                        <p style="font-family: 'Work Sans', Helvetica, Arial, sans-serif; font-size: 14px; line-height: 1.5; margin-bottom: 15px;">
+                          Recuerda que puedes cancelar tu clase hasta 12 horas antes de la clase reservada, caso contrario perderás el crédito de ese booking.
+                        </p>
+                        
+                        <p style="font-family: 'Work Sans', Helvetica, Arial, sans-serif; font-size: 14px; line-height: 1.5; margin-bottom: 15px;">
+                          Por respeto a nuestros coaches y a nuestros riders pedimos puntualidad ya que no podemos interrumpir la sesión en curso. Ten presente que <span style="font-weight: 700; font-style: italic;">tu bici será liberada 4 minutos antes de que inicie la clase.</span>
+                        </p>
+                        
+                        <p style="font-family: 'Work Sans', Helvetica, Arial, sans-serif; font-size: 14px; line-height: 1.5; margin-bottom: 15px;">
+                          Para que todos disfrutemos de la sesión no se permite el uso de teléfonos celulares dentro del estudio.
+                        </p>
+                        
+                        <p style="font-family: 'Work Sans', Helvetica, Arial, sans-serif; font-size: 14px; line-height: 1.5; margin-bottom: 0;">
+                          Por seguridad, los créditos no son transferibles. Asegúrate de reservar tu bici desde tu perfil creado en nuestra app.
+                        </p>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+              
+              <!-- Footer -->
+              <tr>
+                <td style="text-align: center; padding-top: 20px;">
+                  <p style="font-family: 'Work Sans', Helvetica, Arial, sans-serif; font-size: 14px; line-height: 1.5; margin-bottom: 15px;">
+                    Si tienes alguna pregunta, contáctanos por WhatsApp al <a href="https://wa.me/593964193931" style="color: #3D4AF5; text-decoration: none;">+593 96 419 3931</a>
+                  </p>
+                  
+                  <p style="font-family: 'Work Sans', Helvetica, Arial, sans-serif; font-size: 14px; line-height: 1.5; margin-bottom: 15px; color: #777777;">
+                    &copy; ${new Date().getFullYear()} Volta. Todos los derechos reservados.
+                  </p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
     </body>
     </html>
   `;
@@ -338,6 +380,126 @@ const createPasswordResetEmailTemplate = (data: PasswordResetEmailData): string 
           <p>Giro Studio - Tu estudio de spinning favorito</p>
         </div>
       </div>
+    </body>
+    </html>
+  `;
+};
+
+const createMenuPurchaseEmailTemplate = (data: MenuPurchaseEmailData): string => {
+  const itemsHtml = data.items.map(item => `
+    <div style="margin-bottom: 15px;">
+      <strong style="font-family: 'Work Sans', Arial, sans-serif; font-weight: 600; font-size: 16px;">${item.quantity}x ${item.name}</strong>
+      <span style="font-family: 'Work Sans', Arial, sans-serif; font-size: 16px; float: right;">$${(item.quantity * item.unitPrice).toFixed(2)}</span>
+      <div style="clear: both;"></div>
+    </div>
+  `).join('');
+
+  return `
+    <!DOCTYPE html>
+    <html lang="es">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="color-scheme" content="light">
+      <meta name="supported-color-schemes" content="light">
+      <title>Confirmación de Pedido</title>
+      <style>
+        @import url('https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&display=swap');
+      </style>
+    </head>
+    <body style="font-family: 'Work Sans', Helvetica, Arial, sans-serif; margin: 0; padding: 0; background-color: #e9e9e9; color: #333333; -webkit-font-smoothing: antialiased;">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td align="center" style="padding: 40px 20px;">
+            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width: 600px; background-color: #e9e9e9;">
+              <!-- Logo -->
+              <tr>
+                <td align="center" style="padding-bottom: 30px;">
+                  <img src="https://mt5159g3si.ufs.sh/f/yBjaix5tW5pfBPQURnKdJoRQbl2LZmCtSih9E6FaWHqkPp5U" alt="Volta Logo" width="60" style="display: block;">
+                </td>
+              </tr>
+              
+              <!-- Título -->
+              <tr>
+                <td align="center" style="padding-bottom: 50px;">
+                  <h1 style="font-family: 'Work Sans', Helvetica, Arial, sans-serif; color: #000000; font-size: 28px; font-weight: 600; margin: 0;">¡Tu pedido está confirmado!</h1>
+                </td>
+              </tr>
+              
+              <!-- Información del pedido -->
+              <tr>
+                <td style="padding-bottom: 30px;">
+                  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                    <tr>
+                      <td style="background-color: #f8f9fa; border-radius: 12px; padding: 25px;">
+                        <h2 style="font-family: 'Work Sans', Helvetica, Arial, sans-serif; color: #000000; font-size: 20px; font-weight: 600; margin-top: 0; margin-bottom: 20px;">Detalles de tu pedido</h2>
+                        
+                        ${itemsHtml}
+                        
+                        <hr style="border: none; border-top: 1px solid #ddd; margin: 20px 0;">
+                        
+                        <div style="margin-bottom: 15px;">
+                          <strong style="font-family: 'Work Sans', Arial, sans-serif; font-weight: 700; font-size: 18px;">Total:</strong> 
+                          <span style="font-family: 'Work Sans', Arial, sans-serif; font-weight: 700; font-size: 18px; float: right;">$${data.totalAmount.toFixed(2)}</span>
+                          <div style="clear: both;"></div>
+                        </div>
+                        
+                        <div style="margin-bottom: 15px;">
+                          <strong style="font-family: 'Work Sans', Arial, sans-serif; font-weight: 600; font-size: 16px;">Fecha:</strong> 
+                          <span style="font-family: 'Work Sans', Arial, sans-serif; font-size: 16px;">${data.purchaseDate}</span>
+                        </div>
+                        
+                        <div style="margin-bottom: 15px;">
+                          <strong style="font-family: 'Work Sans', Arial, sans-serif; font-weight: 600; font-size: 16px;">Código de autorización:</strong> 
+                          <span style="font-family: 'Work Sans', Arial, sans-serif; font-size: 16px;">${data.authorizationCode}</span>
+                        </div>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+              
+              <!-- Información de recogida -->
+              <tr>
+                <td style="padding-bottom: 30px;">
+                  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                    <tr>
+                      <td style="background-color: #e8f4ff; border-radius: 12px; padding: 25px;">
+                        <h2 style="font-family: 'Work Sans', Helvetica, Arial, sans-serif; color: #000000; font-size: 20px; font-weight: 600; margin-top: 0; margin-bottom: 20px;">Información importante</h2>
+                        
+                        <p style="font-family: 'Work Sans', Helvetica, Arial, sans-serif; font-size: 14px; line-height: 1.5; margin-bottom: 15px;">
+                          Tu pedido estará listo para recoger en aproximadamente <span style="font-weight: 700;">15-20 minutos</span>.
+                        </p>
+                        
+                        <p style="font-family: 'Work Sans', Helvetica, Arial, sans-serif; font-size: 14px; line-height: 1.5; margin-bottom: 15px;">
+                          Te notificaremos cuando esté listo para recoger en recepción.
+                        </p>
+                        
+                        <p style="font-family: 'Work Sans', Helvetica, Arial, sans-serif; font-size: 14px; line-height: 1.5; margin-bottom: 0;">
+                          ¡Gracias por tu compra y por ser parte de la familia Volta! 🥤
+                        </p>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+              
+              <!-- Footer -->
+              <tr>
+                <td style="text-align: center; padding-top: 20px;">
+                  <p style="font-family: 'Work Sans', Helvetica, Arial, sans-serif; font-size: 14px; line-height: 1.5; margin-bottom: 15px;">
+                    Si tienes alguna pregunta, contáctanos por WhatsApp al <a href="https://wa.me/593964193931" style="color: #3D4AF5; text-decoration: none;">+593 96 419 3931</a>
+                  </p>
+                  
+                  <p style="font-family: 'Work Sans', Helvetica, Arial, sans-serif; font-size: 14px; line-height: 1.5; margin-bottom: 15px; color: #777777;">
+                    &copy; ${new Date().getFullYear()} Volta. Todos los derechos reservados.
+                  </p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
     </body>
     </html>
   `;
@@ -549,6 +711,34 @@ export async function sendPasswordResetCodeEmail(data: PasswordResetCodeEmailDat
     
   } catch (error: any) {
     console.error('❌ Error enviando código de recuperación:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+export async function sendMenuPurchaseConfirmationEmail(data: MenuPurchaseEmailData): Promise<{ success: boolean; messageId?: string; error?: string }> {
+  try {
+    const { resend } = getResendClient();
+    console.log('📧 Enviando email de confirmación de pedido de menu a:', data.user.email);
+    
+    const itemsDescription = data.items.map(item => `${item.quantity}x ${item.name}`).join(', ');
+    
+    const { data: result, error } = await resend.emails.send({
+      from: FROM_EMAIL,
+      to: [data.user.email],
+      subject: `¡Pedido confirmado! ${itemsDescription} - Volta`,
+      html: createMenuPurchaseEmailTemplate(data),
+    });
+
+    if (error) {
+      console.error('❌ Error enviando email de pedido de menu:', error);
+      return { success: false, error: error.message };
+    }
+
+    console.log('✅ Email de pedido de menu enviado exitosamente:', result?.id);
+    return { success: true, messageId: result?.id };
+    
+  } catch (error: any) {
+    console.error('❌ Error enviando email de pedido de menu:', error);
     return { success: false, error: error.message };
   }
 } 

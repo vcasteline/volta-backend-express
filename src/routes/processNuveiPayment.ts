@@ -8,6 +8,7 @@ interface MenuPurchaseItem {
   quantity: number;
   unitPrice: number;
   name: string;
+  extras?: any[]; // Array de extras del item
 }
 
 interface PaymentRequest {
@@ -218,7 +219,8 @@ async function createMenuPurchaseAndUpdateTransaction(
     menu_item_id: item.menuItemId,
     quantity: item.quantity,
     unit_price: item.unitPrice,
-    name: item.name
+    name: item.name,
+    extras: item.extras || []
   }));
 
   // Ejecutar transacción atómica usando PostgreSQL
@@ -307,6 +309,14 @@ export const processNuveiPayment = async (req: Request, res: Response) => {
           return res.status(400).json({
             success: false,
             error: 'Each menu item must have menuItemId, quantity, unitPrice, and name'
+          });
+        }
+        
+        // Validar extras si existen
+        if (item.extras && !Array.isArray(item.extras)) {
+          return res.status(400).json({
+            success: false,
+            error: 'Menu item extras must be an array'
           });
         }
       }
@@ -518,7 +528,8 @@ export const processNuveiPayment = async (req: Request, res: Response) => {
               items: menuItems!.map(item => ({
                 name: item.name,
                 quantity: item.quantity,
-                unitPrice: item.unitPrice
+                unitPrice: item.unitPrice,
+                extras: item.extras || []
               })),
               totalAmount: amount,
               purchaseDate: new Date().toLocaleDateString('es-ES', {

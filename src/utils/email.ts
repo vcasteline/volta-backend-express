@@ -44,6 +44,7 @@ export interface MenuPurchaseItem {
   name: string;
   quantity: number;
   unitPrice: number;
+  extras?: any[]; // Array de extras del item
 }
 
 export interface MenuPurchaseEmailData {
@@ -424,13 +425,27 @@ const createPasswordResetEmailTemplate = (data: PasswordResetEmailData): string 
 };
 
 const createMenuPurchaseEmailTemplate = (data: MenuPurchaseEmailData): string => {
-  const itemsHtml = data.items.map(item => `
-    <div style="margin-bottom: 15px;">
-      <strong style="font-family: 'Work Sans', Arial, sans-serif; font-weight: 600; font-size: 16px;">${item.quantity}x ${item.name}</strong>
-      <span style="font-family: 'Work Sans', Arial, sans-serif; font-size: 16px; float: right;">$${(item.quantity * item.unitPrice).toFixed(2)}</span>
-      <div style="clear: both;"></div>
-    </div>
-  `).join('');
+  const itemsHtml = data.items.map(item => {
+    let extrasHtml = '';
+    if (item.extras && item.extras.length > 0) {
+      extrasHtml = `
+        <div style="margin-left: 20px; margin-top: 5px;">
+          <span style="font-family: 'Work Sans', Arial, sans-serif; font-size: 14px; color: #666; font-style: italic;">
+            Extras: ${item.extras.map(extra => extra.name || extra).join(', ')}
+          </span>
+        </div>
+      `;
+    }
+    
+    return `
+      <div style="margin-bottom: 15px;">
+        <strong style="font-family: 'Work Sans', Arial, sans-serif; font-weight: 600; font-size: 16px;">${item.quantity}x ${item.name}</strong>
+        <span style="font-family: 'Work Sans', Arial, sans-serif; font-size: 16px; float: right;">$${(item.quantity * item.unitPrice).toFixed(2)}</span>
+        <div style="clear: both;"></div>
+        ${extrasHtml}
+      </div>
+    `;
+  }).join('');
 
   return `
     <!DOCTYPE html>

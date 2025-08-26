@@ -192,7 +192,8 @@ export const verifyNuveiOTP = async (req: Request, res: Response) => {
 
     const verifyResult: NuveiVerifyResponse = await response.json() as NuveiVerifyResponse;
 
-    console.log('✅ Respuesta de verificación Nuvei:', {
+    console.log('✅ Respuesta de verificación Nuvei para usuario:', {
+      userId: user.id,
       status: verifyResult.status,
       statusDetail: verifyResult.status_detail,
       message: verifyResult.message
@@ -210,7 +211,8 @@ export const verifyNuveiOTP = async (req: Request, res: Response) => {
     const isOtpRejected = verifyResult.status_detail === 33; // OTP not validated
     const isPending = verifyResult.status === 0; // Pending
 
-    console.log('🔍 Analizando resultado OTP:', {
+    console.log('🔍 Analizando resultado OTP para usuario:', {
+      userId: user.id,
       status: verifyResult.status,
       status_detail: verifyResult.status_detail,
       isApproved,
@@ -336,7 +338,13 @@ export const verifyNuveiOTP = async (req: Request, res: Response) => {
 
     } else if (isPending) {
       // Transacción aún pendiente, podría necesitar más tiempo
-      console.log('⏳ Transacción aún pendiente');
+      console.log('⏳ Transacción aún pendiente para usuario:', {
+        userId: user.id,
+        transactionId,
+        status: verifyResult.status,
+        status_detail: verifyResult.status_detail,
+        message: verifyResult.message
+      });
       
       return res.status(202).json({
         success: false,
@@ -361,7 +369,9 @@ export const verifyNuveiOTP = async (req: Request, res: Response) => {
         console.error('Error updating transaction:', updateError);
       }
 
-      console.log('❌ OTP rechazado:', {
+      console.log('❌ OTP rechazado para usuario:', {
+        userId: user.id,
+        transactionId,
         status: verifyResult.status,
         status_detail: verifyResult.status_detail,
         isOtpRejected,

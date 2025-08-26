@@ -1,13 +1,26 @@
 import { Request, Response } from 'express';
 import { supabase } from '../index';
 import { createNuveiAuthToken, getStatusMeaning, NuveiVerifyResponse } from '../utils/nuvei';
-import { sendPurchaseConfirmationEmail } from '../utils/email';
+import { sendPurchaseConfirmationEmail, sendMenuPurchaseConfirmationEmail } from '../utils/email';
+
+interface MenuPurchaseItem {
+  menuItemId: string;
+  quantity: number;
+  unitPrice: number;
+  name: string;
+  extras?: any[];
+}
 
 interface VerifyRequest {
   transactionId: string;
   otp: string;
-  packageId: string;
+  // Para packages
+  packageId?: string;
   credits?: number;
+  // Para menu
+  purchaseType?: 'package' | 'menu';
+  menuItems?: MenuPurchaseItem[];
+  totalAmount?: number;
 }
 
 // Función ATÓMICA para crear compra y actualizar transacción después de OTP
@@ -45,39 +58,96 @@ async function createPurchaseAndUpdateTransactionOTP(
   console.log('✅ Compra y transacción OTP creadas atómicamente');
 }
 
+// Función ATÓMICA para crear compra de menu y actualizar transacción después de OTP
+// Reutiliza la función create_menu_purchase_atomic existente
+async function createMenuPurchaseAndUpdateTransactionOTP(
+  transactionId: string,
+  userId: string,
+  menuItems: MenuPurchaseItem[],
+  totalPaid: number,
+  verifyResult: any
+): Promise<void> {
+  // Convertir menuItems al formato esperado por la RPC
+  const itemsForRPC = menuItems.map(item => ({
+    menu_item_id: item.menuItemId,
+    quantity: item.quantity,
+    unit_price: item.unitPrice,
+    name: item.name,
+    extras: item.extras || []
+  }));
+
+  // Ejecutar transacción atómica usando PostgreSQL (reutilizando la función existente)
+  const { error } = await supabase.rpc('create_menu_purchase_atomic', {
+    p_idempotency_id: transactionId, // Usar transaction_id como idempotency_id
+    p_user_id: userId,
+    p_items: itemsForRPC,
+    p_total_paid: totalPaid,
+    p_authorization_code: transactionId,
+    p_transaction_data: verifyResult,
+    p_transaction_id: transactionId
+  });
+
+  if (error) {
+    console.error('Error en transacción atómica OTP de menu:', error);
+    throw new Error(`Error atómico registrando compra de menu OTP: ${error.message}`);
+  }
+
+  console.log('✅ Compra de menu y transacción OTP creadas atómicamente');
+}
+
 export const verifyNuveiOTP = async (req: Request, res: Response) => {
   try {
     const user = (req as any).user;
     const body: VerifyRequest = req.body;
-    const { transactionId, otp, packageId, credits } = body;
+    const { transactionId, otp, packageId, credits, purchaseType = 'package', menuItems, totalAmount } = body;
 
-    if (!transactionId || !otp || !packageId) {
+    // Validaciones básicas
+    if (!transactionId || !otp) {
       return res.status(400).json({
         success: false,
-        error: 'Missing required fields: transactionId, otp, packageId'
+        error: 'Missing required fields: transactionId, otp'
       });
     }
 
-    // Obtener datos del usuario (necesitamos la cédula para Nuvei)
+    // Validaciones específicas por tipo
+    if (purchaseType === 'package' && !packageId) {
+      return res.status(400).json({
+        success: false,
+        error: 'packageId is required for package purchases'
+      });
+    }
+
+    if (purchaseType === 'menu' && (!menuItems || !totalAmount)) {
+      return res.status(400).json({
+        success: false,
+        error: 'menuItems and totalAmount are required for menu purchases'
+      });
+    }
+
+    // Obtener datos del usuario (necesitamos el username para Nuvei)
     const { data: userData, error: userDbError } = await supabase
       .from('users')
-      .select('cedula')
+      .select('username')
       .eq('id', user.id)
       .single();
 
-    if (userDbError || !userData?.cedula) {
-      throw new Error('User cedula not found');
+    if (userDbError || !userData?.username) {
+      throw new Error('User username not found');
     }
 
-    // Obtener datos de paquete
-    const { data: packageData, error: packageError } = await supabase
-      .from('packages')
-      .select('*')
-      .eq('id', packageId)
-      .single();
+    // Obtener datos de paquete solo si es compra de package
+    let packageData = null;
+    if (purchaseType === 'package') {
+      const { data: pkgData, error: packageError } = await supabase
+        .from('packages')
+        .select('*')
+        .eq('id', packageId)
+        .single();
 
-    if (packageError || !packageData) {
-      throw new Error('Package not found');
+      if (packageError || !pkgData) {
+        throw new Error('Package not found');
+      }
+      packageData = pkgData;
     }
 
     // Crear token de autenticación
@@ -86,7 +156,7 @@ export const verifyNuveiOTP = async (req: Request, res: Response) => {
     // Preparar payload para verificación OTP
     const verifyPayload = {
       user: {
-        id: userData.cedula
+        id: userData.username
       },
       transaction: {
         id: transactionId,
@@ -155,39 +225,75 @@ export const verifyNuveiOTP = async (req: Request, res: Response) => {
       
       try {
         // SOLUCIÓN ATÓMICA: Crear compra y actualizar estado en una sola transacción
-        await createPurchaseAndUpdateTransactionOTP(
-          transactionId,
-          user.id,
-          packageId,
-          packageData,
-          credits || packageData.class_credits,
-          verifyResult
-        );
+        if (purchaseType === 'package') {
+          await createPurchaseAndUpdateTransactionOTP(
+            transactionId,
+            user.id,
+            packageId!,
+            packageData!,
+            credits || packageData!.class_credits,
+            verifyResult
+          );
+        } else if (purchaseType === 'menu') {
+          await createMenuPurchaseAndUpdateTransactionOTP(
+            transactionId,
+            user.id,
+            menuItems!,
+            totalAmount!,
+            verifyResult
+          );
+        }
 
         // Enviar email de confirmación de compra
-        const emailResult = await sendPurchaseConfirmationEmail({
-          user: {
-            email: user.email || '',
-            name: user.user_metadata?.name || user.email || 'Cliente'
-          },
-          packageName: packageData.name,
-          credits: credits || packageData.class_credits,
-          amount: packageData.price || 0,
-          purchaseDate: new Date().toLocaleDateString('es-ES', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-          }),
-          expirationDate: packageData.expiration_days ? 
-            new Date(Date.now() + (packageData.expiration_days * 24 * 60 * 60 * 1000)).toLocaleDateString('es-ES', {
+        let emailResult;
+        if (purchaseType === 'package') {
+          emailResult = await sendPurchaseConfirmationEmail({
+            user: {
+              email: user.email || '',
+              name: user.user_metadata?.name || user.email || 'Cliente'
+            },
+            packageName: packageData!.name,
+            credits: credits || packageData!.class_credits,
+            amount: packageData!.price || 0,
+            purchaseDate: new Date().toLocaleDateString('es-ES', {
               year: 'numeric',
               month: 'long',
-              day: 'numeric'
-            }) : undefined,
-          authorizationCode: transactionId
-        });
+              day: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit'
+            }),
+            expirationDate: packageData!.expiration_days ? 
+              new Date(Date.now() + (packageData!.expiration_days * 24 * 60 * 60 * 1000)).toLocaleDateString('es-ES', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+              }) : undefined,
+            authorizationCode: transactionId
+          });
+        } else {
+          // Para menu purchases, usar el email específico de Volta
+          emailResult = await sendMenuPurchaseConfirmationEmail({
+            user: {
+              email: user.email || '',
+              name: user.user_metadata?.name || user.email || 'Cliente'
+            },
+            items: menuItems!.map(item => ({
+              name: item.name,
+              quantity: item.quantity,
+              unitPrice: item.unitPrice,
+              extras: item.extras || []
+            })),
+            totalAmount: totalAmount!,
+            purchaseDate: new Date().toLocaleDateString('es-ES', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit'
+            }),
+            authorizationCode: transactionId
+          });
+        }
 
         if (!emailResult.success) {
           console.error('⚠️ Error enviando email de compra OTP (no afecta la transacción):', emailResult.error);

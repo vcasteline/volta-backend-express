@@ -127,8 +127,8 @@ cron.schedule('*/30 * * * *', async () => {
   }
 });
 
-// Ejecutar generación de clases semanales todos los domingos a las 9 PM
-cron.schedule('0 21 * * 0', async () => {
+// Ejecutar generación de clases semanales todos los domingos a las 11 AM
+cron.schedule('0 11 * * 0', async () => {
   console.log('🔄 Ejecutando cron job de generación de clases semanales...');
   try {
     await generateWeeklyClassesCron({} as any, {} as any);

@@ -23,6 +23,7 @@ import { resetPassword } from './routes/resetPassword';
 import { sendReservationEmail } from './routes/sendReservationEmail';
 import { sendPurchaseEmail } from './routes/sendPurchaseEmail';
 import deleteAccountRouter from './routes/deleteAccount';
+import { checkCedula } from './routes/checkCedula';
 import { creditsExpirationCron } from './cron/creditsExpiration';
 import { classRemindersCron } from './cron/classReminders';
 import { completePastClassesCron } from './cron/completePastClasses';
@@ -85,6 +86,9 @@ app.post('/api/verify-reset-code', verifyResetCode);
 app.post('/api/reset-password', resetPassword);
 app.post('/api/send-reservation-email', sendReservationEmail);
 app.post('/api/send-purchase-email', authMiddleware, sendPurchaseEmail);
+
+// Validation routes
+app.post('/api/check-cedula', checkCedula);
 
 // Rutas de cron jobs (manuales, protegidas por service key)
 app.post('/api/cron/credits-expiration', creditsExpirationCron);

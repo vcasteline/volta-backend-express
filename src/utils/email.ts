@@ -610,9 +610,9 @@ const createPasswordResetCodeEmailTemplate = (data: PasswordResetCodeEmailData):
                         </p>
                         
                         <!-- Código -->
-                        <div style="background-color: #e8f4ff; border: 2px solid #F6FD91; border-radius: 12px; padding: 30px; margin: 30px 0; text-align: center;">
+                        <div style="background-color: #e8f4ff; border: 2px solid #000000; border-radius: 12px; padding: 30px; margin: 30px 0; text-align: center;">
                           <p style="font-family: 'Work Sans', Arial, sans-serif; font-size: 14px; color: #666; margin: 0 0 10px 0;">Tu código de verificación es:</p>
-                          <div style="font-size: 36px; font-weight: 700; color: #F6FD91; letter-spacing: 8px; margin: 10px 0; font-family: 'Courier New', monospace;">${data.resetCode}</div>
+                          <div style="font-size: 36px; font-weight: 700; color: #000000; letter-spacing: 8px; margin: 10px 0; font-family: 'Courier New', monospace;">${data.resetCode}</div>
                         </div>
                       </td>
                     </tr>

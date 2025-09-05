@@ -610,9 +610,9 @@ const createPasswordResetCodeEmailTemplate = (data: PasswordResetCodeEmailData):
                         </p>
                         
                         <!-- Código -->
-                        <div style="background-color: #e8f4ff; border: 2px solid #3D4AF5; border-radius: 12px; padding: 30px; margin: 30px 0; text-align: center;">
+                        <div style="background-color: #e8f4ff; border: 2px solid #F6FD91; border-radius: 12px; padding: 30px; margin: 30px 0; text-align: center;">
                           <p style="font-family: 'Work Sans', Arial, sans-serif; font-size: 14px; color: #666; margin: 0 0 10px 0;">Tu código de verificación es:</p>
-                          <div style="font-size: 36px; font-weight: 700; color: #3D4AF5; letter-spacing: 8px; margin: 10px 0; font-family: 'Courier New', monospace;">${data.resetCode}</div>
+                          <div style="font-size: 36px; font-weight: 700; color: #F6FD91; letter-spacing: 8px; margin: 10px 0; font-family: 'Courier New', monospace;">${data.resetCode}</div>
                         </div>
                       </td>
                     </tr>
@@ -626,7 +626,7 @@ const createPasswordResetCodeEmailTemplate = (data: PasswordResetCodeEmailData):
                   <table width="100%" cellpadding="0" cellspacing="0" border="0">
                     <tr>
                       <td style="background-color: #e8f4ff; border-radius: 12px; padding: 25px;">
-                        <h2 style="font-family: 'Work Sans', Helvetica, Arial, sans-serif; color: #000000; font-size: 20px; font-weight: 600; margin-top: 0; margin-bottom: 20px;">⚠️ Información importante</h2>
+                        <h2 style="font-family: 'Work Sans', Helvetica, Arial, sans-serif; color: #000000; font-size: 20px; font-weight: 600; margin-top: 0; margin-bottom: 20px;">Información importante</h2>
                         
                         <ul style="font-family: 'Work Sans', Helvetica, Arial, sans-serif; font-size: 14px; line-height: 1.6; margin: 0; padding-left: 20px;">
                           <li style="margin-bottom: 8px;">Este código expira en ${data.expiresInMinutes} minutos</li>

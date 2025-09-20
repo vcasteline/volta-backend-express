@@ -107,11 +107,8 @@ export const waitlistPromotionNotification = async (req: Request, res: Response)
         priority: 'high'
       };
 
-      // Construir URL completa con protocolo correcto
-      let serverUrl = process.env.SERVER_URL || 'http://localhost:3000';
-      if (!serverUrl.startsWith('http://') && !serverUrl.startsWith('https://')) {
-        serverUrl = `https://${serverUrl}`;
-      }
+      // Usar la URL directa de Railway
+      const serverUrl = 'https://volta-backend-express-production.up.railway.app';
       
       const notificationResponse = await fetch(`${serverUrl}/api/send-push-notification`, {
         method: 'POST',

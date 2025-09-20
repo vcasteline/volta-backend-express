@@ -177,7 +177,7 @@ export const waitlistPromotionNotification = [
         pushNotificationSent: !!pushNotificationResult,
         emailSent: emailResult.success,
         emailMessageId: emailResult.messageId,
-        pushMessagesSent: pushNotificationResult?.messagesSent || 0
+        pushMessagesSent: (pushNotificationResult as any)?.messagesSent || 0
       });
 
     } catch (error: any) {

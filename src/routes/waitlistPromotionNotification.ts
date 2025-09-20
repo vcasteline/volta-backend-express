@@ -1,6 +1,5 @@
 import { Request, Response } from 'express';
 import { supabase } from '../index';
-import { serviceKeyMiddleware } from '../middleware/auth';
 import { sendWaitlistPromotionEmail } from '../utils/email';
 
 interface WaitlistPromotionRequest {
@@ -9,14 +8,16 @@ interface WaitlistPromotionRequest {
   reservationId: string;
 }
 
-export const waitlistPromotionNotification = [
-  serviceKeyMiddleware,
-  async (req: Request, res: Response) => {
+export const waitlistPromotionNotification = async (req: Request, res: Response) => {
     try {
+      console.log('🔍 Waitlist promotion notification endpoint reached');
+      console.log('📝 Request body:', JSON.stringify(req.body, null, 2));
+      
       const body: WaitlistPromotionRequest = req.body;
       const { userId, classId, reservationId } = body;
 
       if (!userId || !classId || !reservationId) {
+        console.log('❌ Missing required parameters');
         return res.status(400).json({
           success: false,
           error: 'userId, classId and reservationId are required'
@@ -188,5 +189,4 @@ export const waitlistPromotionNotification = [
         error: error.message || 'Error desconocido'
       });
     }
-  }
-];
+};

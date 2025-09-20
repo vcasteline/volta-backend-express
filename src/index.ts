@@ -80,7 +80,6 @@ app.use('/api/delete-account', authMiddleware, deleteAccountRouter);
 // Rutas de sistema (sin autenticación de usuario, pero con validación de service key)
 app.post('/api/send-push-notification', sendPushNotification);
 app.post('/api/waitlist-notification', waitlistNotification);
-app.post('/api/waitlist-promotion-notification', waitlistPromotionNotification);
 
 // Email routes
 app.post('/api/forgot-password', forgotPassword);
@@ -88,6 +87,7 @@ app.post('/api/verify-reset-code', verifyResetCode);
 app.post('/api/reset-password', resetPassword);
 app.post('/api/send-reservation-email', sendReservationEmail);
 app.post('/api/send-purchase-email', authMiddleware, sendPurchaseEmail);
+app.post('/api/waitlist-promotion-notification', waitlistPromotionNotification);
 
 // Validation routes
 app.post('/api/check-cedula', checkCedula);

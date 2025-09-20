@@ -652,7 +652,7 @@ const createWaitlistPromotionEmailTemplate = (data: WaitlistPromotionEmailData):
                   <table width="100%" cellpadding="0" cellspacing="0" border="0">
                     <tr>
                       <td style="background-color: #e8f4ff; border-radius: 12px; padding: 25px; text-align: center;">
-                        <h2 style="font-family: 'Work Sans', Helvetica, Arial, sans-serif; color: #000000; font-size: 20px; font-weight: 600; margin-top: 0; margin-bottom: 20px;">🎯 Tu reserva está confirmada</h2>
+                        <h2 style="font-family: 'Work Sans', Helvetica, Arial, sans-serif; color: #000000; font-size: 20px; font-weight: 600; margin-top: 0; margin-bottom: 20px;">Tu reserva está confirmada</h2>
                         
                         <p style="font-family: 'Work Sans', Helvetica, Arial, sans-serif; font-size: 16px; line-height: 1.5; margin-bottom: 15px;">
                           Estabas en lista de espera y se liberó un lugar. <strong>Tu reserva ha sido confirmada automáticamente</strong> y ya no necesitas hacer nada más.
@@ -673,7 +673,7 @@ const createWaitlistPromotionEmailTemplate = (data: WaitlistPromotionEmailData):
                   <table width="100%" cellpadding="0" cellspacing="0" border="0">
                     <tr>
                       <td style="background-color: #fff3cd; border-radius: 12px; padding: 25px;">
-                        <h2 style="font-family: 'Work Sans', Helvetica, Arial, sans-serif; color: #000000; font-size: 18px; font-weight: 600; margin-top: 0; margin-bottom: 15px;">⏰ Recordatorios importantes</h2>
+                        <h2 style="font-family: 'Work Sans', Helvetica, Arial, sans-serif; color: #000000; font-size: 18px; font-weight: 600; margin-top: 0; margin-bottom: 15px;">Recordatorios importantes</h2>
                         
                         <p style="font-family: 'Work Sans', Helvetica, Arial, sans-serif; font-size: 14px; line-height: 1.5; margin-bottom: 10px;">
                           • Llega con tiempo: <strong>tu bici será liberada 4 minutos antes del inicio</strong>

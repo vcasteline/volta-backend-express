@@ -17,6 +17,7 @@ import { verifyNuveiOTP } from './routes/verifyNuveiOTP';
 import { deleteCardHandler } from './routes/deleteCard';
 import { sendPushNotification } from './routes/sendPushNotification';
 import { waitlistNotification } from './routes/waitlistNotification';
+import { waitlistPromotionNotification } from './routes/waitlistPromotionNotification';
 import { forgotPassword } from './routes/forgotPassword';
 import { verifyResetCode } from './routes/verifyResetCode';
 import { resetPassword } from './routes/resetPassword';
@@ -79,6 +80,7 @@ app.use('/api/delete-account', authMiddleware, deleteAccountRouter);
 // Rutas de sistema (sin autenticación de usuario, pero con validación de service key)
 app.post('/api/send-push-notification', sendPushNotification);
 app.post('/api/waitlist-notification', waitlistNotification);
+app.post('/api/waitlist-promotion-notification', waitlistPromotionNotification);
 
 // Email routes
 app.post('/api/forgot-password', forgotPassword);

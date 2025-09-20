@@ -91,7 +91,7 @@ export const classRemindersCron = async (req: Request, res: Response) => {
       const notificationPayload = {
         userIds,
         title: "🚴‍♀️ Tu clase empieza en 1 hora",
-        body: `${classItem.name} - ${startTime} con ${(classItem.instructor as any)?.name || 'instructor'}. ¡Prepárate para pedalear! 💪`,
+        body: `${classItem.name || `Rueda con ${(classItem.instructor as any)?.name || 'instructor'}`} - ${startTime}. ¡Prepárate para pedalear! 💪`,
         data: {
           type: 'class_reminder',
           classId: classItem.id,

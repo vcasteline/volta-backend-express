@@ -77,6 +77,15 @@ export interface PasswordResetCodeEmailData {
   expiresInMinutes: number;
 }
 
+export interface WaitlistPromotionEmailData {
+  user: EmailUser;
+  className: string;
+  classDate: string;
+  classTime: string;
+  instructorName: string;
+  bikeNumbers?: string[];
+}
+
 // Email templates
 const createPurchaseEmailTemplate = (data: PurchaseEmailData): string => {
   return `
@@ -558,6 +567,152 @@ const createMenuPurchaseEmailTemplate = (data: MenuPurchaseEmailData): string =>
   `;
 };
 
+const createWaitlistPromotionEmailTemplate = (data: WaitlistPromotionEmailData): string => {
+  const bicyclesList = data.bikeNumbers || [];
+  const fechaReserva = data.classDate;
+  const horaReserva = data.classTime;
+  const instructorName = data.instructorName;
+
+  return `
+    <!DOCTYPE html>
+    <html lang="es">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="color-scheme" content="light">
+      <meta name="supported-color-schemes" content="light">
+      <title>¡Has entrado a la clase!</title>
+      <style>
+        @import url('https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&display=swap');
+      </style>
+    </head>
+    <body style="font-family: 'Work Sans', Helvetica, Arial, sans-serif; margin: 0; padding: 0; background-color: #e9e9e9; color: #333333; -webkit-font-smoothing: antialiased;">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td align="center" style="padding: 40px 20px;">
+            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width: 600px; background-color: #e9e9e9;">
+              <!-- Logo -->
+              <tr>
+                <td align="center" style="padding-bottom: 30px;">
+                  <img src="https://mt5159g3si.ufs.sh/f/yBjaix5tW5pfBPQURnKdJoRQbl2LZmCtSih9E6FaWHqkPp5U" alt="Volta Logo" width="60" style="display: block;">
+                </td>
+              </tr>
+              
+              <!-- Título -->
+              <tr>
+                <td align="center" style="padding-bottom: 50px;">
+                  <h1 style="font-family: 'Work Sans', Helvetica, Arial, sans-serif; color: #000000; font-size: 28px; font-weight: 600; margin: 0;">¡Buenas noticias! 🎉</h1>
+                  <p style="font-family: 'Work Sans', Helvetica, Arial, sans-serif; color: #666666; font-size: 18px; margin: 10px 0 0 0;">Se liberó un espacio y ahora estás en la clase</p>
+                </td>
+              </tr>
+              
+              <!-- Información de reserva -->
+              <tr>
+                <td style="padding-bottom: 30px;">
+                  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                    <tr>
+                      <td style="background-color: #f8f9fa; border-radius: 12px; padding: 25px;">
+                        <h2 style="font-family: 'Work Sans', Helvetica, Arial, sans-serif; color: #000000; font-size: 20px; font-weight: 600; margin-top: 0; margin-bottom: 20px;">Detalles de tu reserva</h2>
+                        
+                        <div style="margin-bottom: 15px;">
+                          <strong style="font-family: 'Work Sans', Arial, sans-serif; font-weight: 600; font-size: 16px;">Clase:</strong> 
+                          <span style="font-family: 'Work Sans', Arial, sans-serif; font-size: 16px;">${data.className}</span>
+                        </div>
+
+                        ${bicyclesList.length > 0 ? `
+                        <div style="margin-bottom: 15px;">
+                          <strong style="font-family: 'Work Sans', Arial, sans-serif; font-weight: 600; font-size: 16px;">Bici${bicyclesList.length > 1 ? 's' : ''}:</strong> 
+                          <span style="font-family: 'Work Sans', Arial, sans-serif; font-size: 16px;">${bicyclesList.join(', ')}</span>
+                        </div>
+                        ` : ''}
+                        
+                        <div style="margin-bottom: 15px;">
+                          <strong style="font-family: 'Work Sans', Arial, sans-serif; font-weight: 600; font-size: 16px;">Día:</strong> 
+                          <span style="font-family: 'Work Sans', Arial, sans-serif; font-size: 16px;">${fechaReserva}</span>
+                        </div>
+                        
+                        <div style="margin-bottom: 15px;">
+                          <strong style="font-family: 'Work Sans', Arial, sans-serif; font-weight: 600; font-size: 16px;">Hora:</strong> 
+                          <span style="font-family: 'Work Sans', Arial, sans-serif; font-size: 16px;">${horaReserva}</span>
+                        </div>
+                        
+                        <div style="margin-bottom: 15px;">
+                          <strong style="font-family: 'Work Sans', Arial, sans-serif; font-weight: 600; font-size: 16px;">Instructor:</strong> 
+                          <span style="font-family: 'Work Sans', Arial, sans-serif; font-size: 16px;">${instructorName}</span>
+                        </div>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+              
+              <!-- Mensaje especial -->
+              <tr>
+                <td style="padding-bottom: 30px;">
+                  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                    <tr>
+                      <td style="background-color: #e8f4ff; border-radius: 12px; padding: 25px; text-align: center;">
+                        <h2 style="font-family: 'Work Sans', Helvetica, Arial, sans-serif; color: #000000; font-size: 20px; font-weight: 600; margin-top: 0; margin-bottom: 20px;">🎯 Tu reserva está confirmada</h2>
+                        
+                        <p style="font-family: 'Work Sans', Helvetica, Arial, sans-serif; font-size: 16px; line-height: 1.5; margin-bottom: 15px;">
+                          Estabas en lista de espera y se liberó un lugar. <strong>Tu reserva ha sido confirmada automáticamente</strong> y ya no necesitas hacer nada más.
+                        </p>
+                        
+                        <p style="font-family: 'Work Sans', Helvetica, Arial, sans-serif; font-size: 16px; line-height: 1.5; margin-bottom: 0;">
+                          ¡Te esperamos en clase! 
+                        </p>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+              
+              <!-- Políticas -->
+              <tr>
+                <td style="padding-bottom: 30px;">
+                  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                    <tr>
+                      <td style="background-color: #fff3cd; border-radius: 12px; padding: 25px;">
+                        <h2 style="font-family: 'Work Sans', Helvetica, Arial, sans-serif; color: #000000; font-size: 18px; font-weight: 600; margin-top: 0; margin-bottom: 15px;">⏰ Recordatorios importantes</h2>
+                        
+                        <p style="font-family: 'Work Sans', Helvetica, Arial, sans-serif; font-size: 14px; line-height: 1.5; margin-bottom: 10px;">
+                          • Llega con tiempo: <strong>tu bici será liberada 4 minutos antes del inicio</strong>
+                        </p>
+                        
+                        <p style="font-family: 'Work Sans', Helvetica, Arial, sans-serif; font-size: 14px; line-height: 1.5; margin-bottom: 10px;">
+                          • Puedes cancelar hasta 12 horas antes sin perder tu crédito
+                        </p>
+                        
+                        <p style="font-family: 'Work Sans', Helvetica, Arial, sans-serif; font-size: 14px; line-height: 1.5; margin-bottom: 0;">
+                          • No se permite el uso de celulares durante la clase
+                        </p>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+              
+              <!-- Footer -->
+              <tr>
+                <td style="text-align: center; padding-top: 20px;">
+                  <p style="font-family: 'Work Sans', Helvetica, Arial, sans-serif; font-size: 14px; line-height: 1.5; margin-bottom: 15px;">
+                    Si tienes alguna pregunta, contáctanos por WhatsApp al <a href="https://wa.me/593964193931" style="color: #3D4AF5; text-decoration: none;">+593 96 419 3931</a>
+                  </p>
+                  
+                  <p style="font-family: 'Work Sans', Helvetica, Arial, sans-serif; font-size: 14px; line-height: 1.5; margin-bottom: 15px; color: #777777;">
+                    &copy; ${new Date().getFullYear()} Volta. Todos los derechos reservados.
+                  </p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    </body>
+    </html>
+  `;
+};
+
 const createPasswordResetCodeEmailTemplate = (data: PasswordResetCodeEmailData): string => {
   return `
     <!DOCTYPE html>
@@ -794,6 +949,32 @@ export async function sendMenuPurchaseConfirmationEmail(data: MenuPurchaseEmailD
     
   } catch (error: any) {
     console.error('❌ Error enviando email de pedido de menu:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+export async function sendWaitlistPromotionEmail(data: WaitlistPromotionEmailData): Promise<{ success: boolean; messageId?: string; error?: string }> {
+  try {
+    const { resend } = getResendClient();
+    console.log('📧 Enviando email de promoción de waitlist a:', data.user.email);
+    
+    const { data: result, error } = await resend.emails.send({
+      from: FROM_EMAIL,
+      to: [data.user.email],
+      subject: `¡Has entrado a la clase! ${data.className} - Volta`,
+      html: createWaitlistPromotionEmailTemplate(data),
+    });
+
+    if (error) {
+      console.error('❌ Error enviando email de promoción de waitlist:', error);
+      return { success: false, error: error.message };
+    }
+
+    console.log('✅ Email de promoción de waitlist enviado exitosamente:', result?.id);
+    return { success: true, messageId: result?.id };
+    
+  } catch (error: any) {
+    console.error('❌ Error enviando email de promoción de waitlist:', error);
     return { success: false, error: error.message };
   }
 } 

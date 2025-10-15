@@ -25,6 +25,7 @@ import { sendReservationEmail } from './routes/sendReservationEmail';
 import { sendPurchaseEmail } from './routes/sendPurchaseEmail';
 import deleteAccountRouter from './routes/deleteAccount';
 import { checkCedula } from './routes/checkCedula';
+import { checkUsername } from './routes/checkUsername';
 import { creditsExpirationCron } from './cron/creditsExpiration';
 import { classRemindersCron } from './cron/classReminders';
 import { completePastClassesCron } from './cron/completePastClasses';
@@ -91,6 +92,7 @@ app.post('/api/waitlist-promotion-notification', waitlistPromotionNotification);
 
 // Validation routes
 app.post('/api/check-cedula', checkCedula);
+app.post('/api/check-username', checkUsername);
 
 // Rutas de cron jobs (manuales, protegidas por service key)
 app.post('/api/cron/credits-expiration', creditsExpirationCron);

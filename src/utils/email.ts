@@ -285,7 +285,7 @@ const createReservationEmailTemplate = (data: ReservationEmailData): string => {
                         <h2 style="font-family: 'Work Sans', Helvetica, Arial, sans-serif; color: #000000; font-size: 20px; font-weight: 600; margin-top: 0; margin-bottom: 20px;">Políticas importantes</h2>
                         
                         <p style="font-family: 'Work Sans', Helvetica, Arial, sans-serif; font-size: 14px; line-height: 1.5; margin-bottom: 15px;">
-                          Recuerda que puedes cancelar tu clase hasta 12 horas antes de la clase reservada, caso contrario perderás el crédito de ese booking.
+                          Recuerda que puedes cancelar tu clase hasta 4 horas antes de la clase reservada, caso contrario perderás el crédito de ese booking.
                         </p>
                         
                         <p style="font-family: 'Work Sans', Helvetica, Arial, sans-serif; font-size: 14px; line-height: 1.5; margin-bottom: 15px;">
@@ -680,7 +680,7 @@ const createWaitlistPromotionEmailTemplate = (data: WaitlistPromotionEmailData):
                         </p>
                         
                         <p style="font-family: 'Work Sans', Helvetica, Arial, sans-serif; font-size: 14px; line-height: 1.5; margin-bottom: 10px;">
-                          • Puedes cancelar hasta 12 horas antes sin perder tu crédito
+                          • Puedes cancelar hasta 4 horas antes sin perder tu crédito
                         </p>
                         
                         <p style="font-family: 'Work Sans', Helvetica, Arial, sans-serif; font-size: 14px; line-height: 1.5; margin-bottom: 0;">

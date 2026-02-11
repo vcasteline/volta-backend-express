@@ -12,14 +12,19 @@ export const completePastClassesCron = async (req: Request, res: Response) => {
     const todayDate = nowInEcuador.toISODate();
     const currentTime = nowInEcuador.toFormat('HH:mm:ss');
 
+    // Solo traer clases pasadas que aún tengan reservaciones confirmed o waitlist
     const { data: pastClasses, error: classesError } = await supabase
       .from('classes')
       .select(`
         id,
         date,
         end_time,
-        name
+        name,
+        reservations!inner (
+          id
+        )
       `)
+      .in('reservations.status', ['confirmed', 'waitlist'])
       .or(`date.lt.${todayDate},and(date.eq.${todayDate},end_time.lt.${currentTime})`);
 
     if (classesError) {
